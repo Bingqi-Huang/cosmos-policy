@@ -9,6 +9,11 @@ __pycache__/
 # Training checkpoints (large model weights, ~30GB+)
 /outputs/phase1/cosmos_policy/
 
+# Local runtime/benchmark artifacts; keep summaries in AGENT docs instead of git.
+/outputs/phase1/nccl_bench/
+/outputs/phase1/speed_bench/
+*.pid
+
 # Model weight files
 *.pt
 *.pth

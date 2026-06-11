@@ -199,11 +199,12 @@ StateDictItemPath = namedtuple("StateDictItemPath", ["state_dict", "save_path"])
 # to people who find it difficult to digest the code, official tutorial for torch dcp may be helpful
 
 
-def dcp_load_state_dict(_state_dict, storage_reader, load_planner):
+def dcp_load_state_dict(_state_dict, storage_reader, load_planner, process_group=None):
     dcp.load(
         _state_dict,
         storage_reader=storage_reader,
         planner=load_planner,
+        process_group=process_group,
     )
     # Check for missing and unexpected keys by comparing with checkpoint metadata
     missing_keys = []
@@ -480,16 +481,16 @@ class DistributedCheckpointer(AbstractCheckpointer):
             self.staging_ckpt_file = None
             self.staging_stream = torch.cuda.Stream()
 
-        self.dcp_save_process_group = None
+        self.dcp_process_group = None
         if (
             torch.distributed.is_available()
             and torch.distributed.is_initialized()
             and torch.distributed.get_world_size() > 1
         ):
-            # DCP uses object collectives while planning saves. On this host's
+            # DCP uses object collectives while planning saves/loads. On this host's
             # Blackwell/NCCL stack, NCCL object collectives corrupt CUDA memory;
             # keeping DCP metadata on Gloo avoids that without changing FSDP.
-            self.dcp_save_process_group = torch.distributed.new_group(backend="gloo")
+            self.dcp_process_group = torch.distributed.new_group(backend="gloo")
             log.info("Using Gloo process group for DCP checkpoint metadata collectives.", rank0_only=True)
 
     def keys_to_resume_during_load(self) -> Tuple[Set, Union[str, None]]:
@@ -601,14 +602,19 @@ class DistributedCheckpointer(AbstractCheckpointer):
                     cur_key_ckpt_full_path = os.path.join(checkpoint_path, key)
                     log.critical(f"Start loading checkpoint from {checkpoint_path}")
                     storage_reader = self.get_storage_reader(cur_key_ckpt_full_path)
-                    torch.distributed.barrier()
+                    torch.distributed.barrier(group=self.dcp_process_group)
                     log.critical(f"starting {cur_key_ckpt_full_path}", rank0_only=False)
                     if key == "model":
                         log.info("- Loading the model...")
                         _model_wrapper = ModelWrapper(model)
                         _state_dict = _model_wrapper.state_dict()
 
-                        dcp_load_state_dict(_state_dict, storage_reader, load_planner)
+                        dcp_load_state_dict(
+                            _state_dict,
+                            storage_reader,
+                            load_planner,
+                            process_group=self.dcp_process_group,
+                        )
                         _model_wrapper.load_state_dict(_state_dict)
                     elif key == "optim":
                         log.info("- Loading the optimizer...")
@@ -618,6 +624,7 @@ class DistributedCheckpointer(AbstractCheckpointer):
                             _state_dict,
                             storage_reader=storage_reader,
                             planner=load_planner,
+                            process_group=self.dcp_process_group,
                         )
                         _optim_wrapper.load_state_dict(_state_dict)
                     elif key == "scheduler":
@@ -627,6 +634,7 @@ class DistributedCheckpointer(AbstractCheckpointer):
                             _state_dict,
                             storage_reader=storage_reader,
                             planner=load_planner,
+                            process_group=self.dcp_process_group,
                         )
                         scheduler.load_state_dict(_state_dict)
                     elif key == "trainer":
@@ -639,6 +647,7 @@ class DistributedCheckpointer(AbstractCheckpointer):
                             _state_dict,
                             storage_reader=storage_reader,
                             planner=load_planner,
+                            process_group=self.dcp_process_group,
                         )
                         grad_scaler.load_state_dict(_state_dict["grad_scaler"])
                         iteration = _state_dict["iteration"]
@@ -738,7 +747,7 @@ class DistributedCheckpointer(AbstractCheckpointer):
                 v,
                 storage_writer=storage_writer,
                 planner=DefaultSavePlanner(dedup_save_to_lowest_rank=True),
-                process_group=self.dcp_save_process_group,
+                process_group=self.dcp_process_group,
             )
             log.critical(
                 f"DCP save done: key={k}, elapsed={time.monotonic() - start_time:.2f}s",
@@ -844,6 +853,6 @@ class DistributedCheckpointer(AbstractCheckpointer):
                 self.mp_queue_send.put(Terminate())
                 self.get_previous_checkpoint_results(wait_for=60)
                 self.mp.join()
-        if self.dcp_save_process_group is not None:
-            torch.distributed.destroy_process_group(self.dcp_save_process_group)
-            self.dcp_save_process_group = None
+        if self.dcp_process_group is not None:
+            torch.distributed.destroy_process_group(self.dcp_process_group)
+            self.dcp_process_group = None

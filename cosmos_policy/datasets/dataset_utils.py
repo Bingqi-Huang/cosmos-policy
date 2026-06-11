@@ -286,13 +286,16 @@ def resize_images(images: np.ndarray, target_size: int) -> np.ndarray:
     return resized_images
 
 
-def apply_image_aug(images: torch.Tensor, stronger: bool = False) -> torch.Tensor:
+def apply_image_aug(images: torch.Tensor, stronger: bool = False, photometric_only: bool = False) -> torch.Tensor:
     """
     Apply image augmentations to a batch of images represented as a torch.Tensor of shape (C, T, H, W).
 
     Args:
         images: A torch.Tensor of shape (C, T, H, W) and dtype torch.uint8 representing a set of images.
         stronger (bool): Whether to apply stronger augmentations
+        photometric_only (bool): If True, skip spatial augmentations (random resized crop and rotation) and
+            apply only color jitter. Required for SCVC pair branches (B6b locked semantics: spatial aug off,
+            photometric independent across views).
 
     Returns:
         A torch.Tensor of the same shape and dtype with augmentations applied.
@@ -353,10 +356,11 @@ def apply_image_aug(images: torch.Tensor, stronger: bool = False) -> torch.Tenso
         img = images[group_start]
 
         # 1. Apply random crop and resize back
-        img = F.resized_crop(img, i, j, h, w, size=[H, W], antialias=True)
+        if not photometric_only:
+            img = F.resized_crop(img, i, j, h, w, size=[H, W], antialias=True)
 
         # 2. Apply random rotation (skip if angle == 0)
-        if stronger:
+        if stronger and not photometric_only:
             img = F.rotate(img, angle, expand=False)
 
         # 3. Apply color jitter
@@ -382,6 +386,7 @@ def preprocess_image(
     normalize_images: bool = False,
     use_image_aug: bool = True,
     stronger_image_aug: bool = False,
+    photometric_only_aug: bool = False,
 ) -> torch.Tensor:
     """
     Preprocesses images for training.
@@ -410,7 +415,7 @@ def preprocess_image(
     images = np.transpose(images, (3, 0, 1, 2))  # (T, H, W, C) -> (C, T, H, W)
     images = torch.from_numpy(images)
     if use_image_aug:
-        images = apply_image_aug(images, stronger=stronger_image_aug)
+        images = apply_image_aug(images, stronger=stronger_image_aug, photometric_only=photometric_only_aug)
     if normalize_images:
         # Normalize images and return as dtype torch.float32
         images = images.to(torch.float32)

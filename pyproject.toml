@@ -173,6 +173,10 @@ cu128 = [
   "nvidia-cusolver-cu12==11.7.2.55",
   "nvidia-cusparse-cu12==12.5.7.53",
   "nvidia-cusparselt-cu12==0.6.3",
+  # NOTE: torch 2.7.0 wheel metadata hard-pins nvidia-nccl-cu12==2.26.2, but 2.26.2 crashes
+  # on RTX PRO 6000 Blackwell (CUDA illegal memory access in P2P/SHM transports, corrupted
+  # NCCL object collectives). The actual installed version is forced to 2.30.7 via
+  # [tool.uv] override-dependencies below (see AGENT/training_speed_optimization.md).
   "nvidia-nccl-cu12==2.26.2",
   "nvidia-nvjitlink-cu12==12.8.61",
   "nvidia-nvtx-cu12==12.8.55",
@@ -226,7 +230,13 @@ conflicts = [
     {group="robocasa"},
   ]
 ]
-override-dependencies = ["numpy>=2.0.0"]
+override-dependencies = [
+  "numpy>=2.0.0",
+  # Blackwell fix: torch 2.7.0 pins NCCL 2.26.2, which is broken on RTX PRO 6000
+  # (see AGENT/training_speed_optimization.md). libnccl.so.2 is ABI-stable, so the
+  # newer runtime is a drop-in replacement.
+  "nvidia-nccl-cu12==2.30.7; sys_platform == 'linux'",
+]
 
 [tool.uv.sources]
 # https://docs.astral.sh/uv/guides/integration/pytorch/#configuring-accelerators-with-optional-dependencies

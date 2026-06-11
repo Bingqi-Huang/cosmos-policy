@@ -24,8 +24,10 @@ from cosmos_policy._src.imaginaire.utils import log
 from cosmos_policy._src.imaginaire.utils.checkpoint_db import get_checkpoint_path  # noqa: F401
 from cosmos_policy.datasets.aloha_dataset import ALOHADataset
 from cosmos_policy.datasets.libero_dataset import LIBERODataset
+from cosmos_policy.datasets.libero_pair_dataset import LIBEROPairDataset
 from cosmos_policy.datasets.robocasa_dataset import RoboCasaDataset
 from cosmos_policy.models.policy_video2world_model import CosmosPolicyVideo2WorldModel
+from cosmos_policy.models.scvc_policy_video2world_model import SCVCPolicyVideo2WorldModel
 from cosmos_policy.modules.hybrid_edm_sde import HybridEDMSDE
 
 cs = ConfigStore.instance()
@@ -289,6 +291,97 @@ cosmos_predict2_2b_480p_libero_scene_only__inference_only = LazyDict(
         job=dict(
             group="cosmos_v2_inference",
             name="cosmos_predict2_2b_480p_libero_scene_only__inference_only",
+        ),
+    )
+)
+
+
+# Scene-only paired-data SCVC config.  The manifest path is intentionally an
+# environment variable so the config can be registered before Phase-2 rendering
+# has completed.
+libero_pair_scene_only_dataset = L(LIBEROPairDataset)(
+    data_dir=os.path.join(BASE_DATASETS_DIR, "LIBERO-Cosmos-Policy", "success_only"),
+    pair_manifest_path=os.environ.get(
+        "PAIR_MANIFEST_PATH",
+        os.path.join(
+            BASE_DATASETS_DIR,
+            "outputs",
+            "phase2",
+            "pair_future_frames",
+            "libero_pair_future_manifest_train.jsonl",
+        ),
+    ),
+    repo_root=BASE_DATASETS_DIR,
+    t5_text_embeddings_path=os.path.join(
+        BASE_DATASETS_DIR, "LIBERO-Cosmos-Policy", "success_only", "t5_embeddings.pkl"
+    ),
+    chunk_size=16,
+    final_image_size=224,
+    use_image_aug=True,
+    use_stronger_image_aug=True,
+    normalize_actions=True,
+    normalize_proprio=True,
+    use_proprio=True,
+    num_duplicates_per_image=4,
+    return_value_function_returns=True,
+    gamma=0.99,
+    # Plan A rollout mixture (researcher-ratified 2026-06-11): pass-through rollout samples preserve
+    # Cosmos's 0.5:0.5 demo:rollout schedule so the value/world-model heads keep failure data (E5).
+    rollout_data_dir=os.environ.get(
+        "PAIR_ROLLOUT_DATA_DIR",
+        os.path.join(BASE_DATASETS_DIR, "LIBERO-Cosmos-Policy", "all_episodes"),
+    ),
+    success_rollout_sampling_prob=0.5,
+)
+cosmos_predict2_2b_480p_libero_scvc_scene_only = LazyDict(
+    dict(
+        defaults=[
+            "/experiment/cosmos_predict2_2b_480p_libero_scene_only",
+            "_self_",
+        ],
+        model=L(SCVCPolicyVideo2WorldModel)(
+            config=dict(
+                state_t=7,
+                min_num_conditional_frames=3,
+                max_num_conditional_frames=3,
+                tokenizer=dict(
+                    chunk_duration=25,
+                ),
+                lambda_cv=float(os.environ.get("LAMBDA_CV", "0.1")),
+                cv_warmup_start_fraction=float(os.environ.get("CV_WARMUP_START_FRACTION", "0.0")),
+                cv_warmup_end_fraction=float(os.environ.get("CV_WARMUP_END_FRACTION", "0.1")),
+                cv_frame_set=os.environ.get("CV_FRAME_SET", "action+value+fproprio"),
+                cv_noise_shared=os.environ.get("CV_NOISE_SHARED", "true").lower() == "true",
+                cv_pair_mode=os.environ.get("CV_PAIR_MODE", "matched"),
+                cv_num_samples=int(os.environ.get("CV_NUM_SAMPLES", "2")),
+                cv_total_steps=int(os.environ.get("CV_TOTAL_STEPS", os.environ.get("MAX_ITER", "10000"))),
+            ),
+        ),
+        dataloader_train=L(DataLoader)(
+            num_workers=8,
+            persistent_workers=True,
+            pin_memory=True,
+            dataset=libero_pair_scene_only_dataset,
+            sampler=L(DistributedSampler)(
+                dataset=libero_pair_scene_only_dataset,
+                num_replicas=L(parallel_state.get_data_parallel_world_size)(),
+                rank=L(parallel_state.get_data_parallel_rank)(),
+                shuffle=True,
+                seed=0,
+            ),
+            batch_size=int(os.environ.get("PAIR_BATCH_SIZE", "10")),
+            drop_last=True,
+        ),
+        checkpoint=dict(
+            load_path=get_checkpoint_path(
+                "hf://nvidia/Cosmos-Policy-LIBERO-Predict2-2B/Cosmos-Policy-LIBERO-Predict2-2B.pt"
+            ),
+            load_training_state=False,
+            strict_resume=False,
+        ),
+        job=dict(
+            group="cosmos_v2_finetune",
+            name=os.environ.get("JOB_NAME", "cosmos_predict2_2b_480p_libero_scvc_scene_only"),
         ),
     )
 )
@@ -563,6 +656,7 @@ def register_configs():
         cosmos_predict2_2b_480p_libero__inference_only,
         cosmos_predict2_2b_480p_libero_scene_only,
         cosmos_predict2_2b_480p_libero_scene_only__inference_only,
+        cosmos_predict2_2b_480p_libero_scvc_scene_only,
         # RoboCasa
         cosmos_predict2_2b_480p_robocasa_50_demos_per_task,  # *** Main checkpoint ***
         cosmos_predict2_2b_480p_robocasa_50_demos_per_task__inference,

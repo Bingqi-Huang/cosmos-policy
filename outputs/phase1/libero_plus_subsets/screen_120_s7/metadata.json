@@ -1,0 +1,22 @@
+{
+  "condition_counts": {
+    "C1": 24,
+    "C2": 74,
+    "C3": 22
+  },
+  "level_counts": {
+    "1": 17,
+    "2": 27,
+    "3": 23,
+    "4": 20,
+    "5": 33
+  },
+  "num_tasks": 120,
+  "source_subset_jsonl": "/nvme02/bingqi/Project/view-invariant_vla/code/results/libero_plus_subsets/screen_120_s7/subset_tasks.jsonl",
+  "suite_counts": {
+    "libero_10": 30,
+    "libero_goal": 31,
+    "libero_object": 30,
+    "libero_spatial": 29
+  }
+}
