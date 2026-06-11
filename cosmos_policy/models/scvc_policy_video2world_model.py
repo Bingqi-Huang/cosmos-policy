@@ -162,6 +162,8 @@ class SCVCPolicyVideo2WorldModel(CosmosPolicyVideo2WorldModel):
         # CV below mirrors both conventions and divides by (B·T), never by the number of CV frames
         # or the number of valid pairs.
         batch_size, _, num_frames, _, _ = pred0.shape
+        if weights_B_T.shape[-1] == 1:
+            weights_B_T = weights_B_T.expand(-1, num_frames)
         batch_indices = torch.arange(batch_size, device=pred0.device)
         # Both comparison arms must be valid demo pairs (matters under derangement and for
         # pass-through rollout samples, which carry pair_valid=0).
