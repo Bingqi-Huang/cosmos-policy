@@ -202,6 +202,98 @@ cosmos_predict2_2b_480p_libero__inference_only = LazyDict(
 )
 
 
+# Scene-only LIBERO nominal-reference candidate.
+# This starts from the released LIBERO policy checkpoint, then adapts to the
+# wrist-free P2 temporal layout.
+libero_all_4_suites_scene_only_dataset = L(LIBERODataset)(
+    data_dir=os.path.join(BASE_DATASETS_DIR, "LIBERO-Cosmos-Policy", "success_only"),  # Successful demos
+    t5_text_embeddings_path=os.path.join(
+        BASE_DATASETS_DIR, "LIBERO-Cosmos-Policy", "success_only", "t5_embeddings.pkl"
+    ),
+    chunk_size=16,
+    use_image_aug=True,
+    use_wrist_images=False,
+    use_third_person_images=True,
+    use_proprio=True,
+    normalize_proprio=True,
+    normalize_actions=True,
+    num_duplicates_per_image=4,  # WAN 2.1 tokenizer: 4 images per latent frame
+    use_stronger_image_aug=True,
+    rollout_data_dir=os.path.join(
+        BASE_DATASETS_DIR, "LIBERO-Cosmos-Policy", "all_episodes"
+    ),  # All demo rollouts (successes + failures)
+    demonstration_sampling_prob=0.5,
+    success_rollout_sampling_prob=0.5,
+    return_value_function_returns=True,
+    gamma=0.99,
+    lazy_load_demos=True,
+)
+cosmos_predict2_2b_480p_libero_scene_only = LazyDict(
+    dict(
+        defaults=[
+            "/experiment/cosmos_predict2_2b_480p_libero",
+            "_self_",
+        ],
+        model=L(CosmosPolicyVideo2WorldModel)(
+            config=dict(
+                state_t=7,  # blank, proprio, primary, action, future proprio, future primary, value
+                min_num_conditional_frames=3,  # blank, proprio, primary
+                max_num_conditional_frames=3,  # blank, proprio, primary
+                tokenizer=dict(
+                    chunk_duration=25,  # 1 blank + 24 images (6 latent slots x 4 images)
+                ),
+            ),
+        ),
+        dataloader_train=L(DataLoader)(
+            num_workers=12,
+            persistent_workers=True,
+            pin_memory=True,
+            dataset=libero_all_4_suites_scene_only_dataset,
+            sampler=L(DistributedSampler)(
+                dataset=libero_all_4_suites_scene_only_dataset,
+                num_replicas=L(parallel_state.get_data_parallel_world_size)(),
+                rank=L(parallel_state.get_data_parallel_rank)(),
+                shuffle=True,
+                seed=0,
+            ),
+            batch_size=30,
+            drop_last=True,
+        ),
+        checkpoint=dict(
+            load_path=get_checkpoint_path(
+                "hf://nvidia/Cosmos-Policy-LIBERO-Predict2-2B/Cosmos-Policy-LIBERO-Predict2-2B.pt"
+            ),
+            load_training_state=False,
+            strict_resume=False,
+        ),
+        job=dict(
+            group="cosmos_v2_finetune",
+            name="cosmos_predict2_2b_480p_libero_scene_only",
+        ),
+    )
+)
+cosmos_predict2_2b_480p_libero_scene_only__inference_only = LazyDict(
+    dict(
+        defaults=[
+            "/experiment/cosmos_predict2_2b_480p_libero_scene_only",
+            "_self_",
+        ],
+        model=L(CosmosPolicyVideo2WorldModel)(
+            config=dict(
+                sde=L(HybridEDMSDE)(
+                    sigma_max=80,
+                    sigma_min=4,
+                )
+            )
+        ),
+        job=dict(
+            group="cosmos_v2_inference",
+            name="cosmos_predict2_2b_480p_libero_scene_only__inference_only",
+        ),
+    )
+)
+
+
 # *** Main checkpoint ***
 robocasa_50_demos_per_task_dataset = L(RoboCasaDataset)(
     data_dir=os.path.join(BASE_DATASETS_DIR, "RoboCasa-Cosmos-Policy", "success_only"),  # Successful demos
@@ -469,6 +561,8 @@ def register_configs():
         # LIBERO
         cosmos_predict2_2b_480p_libero,  # *** Main checkpoint ***
         cosmos_predict2_2b_480p_libero__inference_only,
+        cosmos_predict2_2b_480p_libero_scene_only,
+        cosmos_predict2_2b_480p_libero_scene_only__inference_only,
         # RoboCasa
         cosmos_predict2_2b_480p_robocasa_50_demos_per_task,  # *** Main checkpoint ***
         cosmos_predict2_2b_480p_robocasa_50_demos_per_task__inference,

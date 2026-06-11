@@ -197,6 +197,8 @@ class PolicyEvalConfig:
     num_third_person_images: int = 1                                     # Number of third-person images to include in input (LIBERO: 1 agentview image)
     use_wrist_image: bool = True                                         # Whether to include wrist image in input
     num_wrist_images: int = 1                                            # Number of wrist images to include in input (LIBERO: 1 wrist image)
+    primary_image_mask_mode: str = "none"                                # E1.0 audit mask for primary image: none, black, gray, noise
+    wrist_image_mask_mode: str = "none"                                  # E1.0 audit mask for wrist image: none, black, gray, noise
     use_proprio: bool = True                                             # Whether to include proprio state in input
     flip_images: bool = True                                             # Whether to flip images vertically across x-axis
     use_variance_scale: bool = False                                     # Whether to scale variance used to sample sigma max for denoising for increased diversity in generations
@@ -242,6 +244,12 @@ class PolicyEvalConfig:
     #################################################################################################################
     task_suite_name: str = TaskSuite.LIBERO_SPATIAL                      # Task suite (must be one of: LIBERO_SPATIAL, LIBERO_OBJECT, LIBERO_GOAL, LIBERO_10, LIBERO_90)
     num_trials_per_task: int = 50                                        # Number of rollouts per task
+    task_indices_file: str = ""                                          # Optional path to JSON file with list of task indices to evaluate (empty = all tasks)
+    camera_tasks_file: str = ""                                          # Optional path to JSON with list of LIBERO-Plus camera task names; triggers camera-eval mode (overrides task_indices_file)
+    num_shards: int = 1                                                  # Total number of parallel shards (1 = no sharding)
+    shard_index: int = 0                                                 # Index of this shard (0-based); tasks where task_idx % num_shards == shard_index are run
+    shard_results_json: str = ""                                         # If set, write per-shard {episodes, successes, sr} JSON here after eval completes
+    per_task_jsonl: str = ""                                             # If set, append one JSON line per camera task {task_name, successes, trials} for report generation
     initial_states_path: str = "DEFAULT"                                 # "DEFAULT", or path to initial states JSON file
     env_img_res: int = 256                                               # Resolution for rendering environment images (not policy input resolution)
 
@@ -288,6 +296,14 @@ def validate_config(cfg: PolicyEvalConfig) -> None:
     # Validate task suite
     assert cfg.task_suite_name in [suite.value for suite in TaskSuite], f"Invalid task suite: {cfg.task_suite_name}"
 
+    valid_mask_modes = {"none", "black", "gray", "noise"}
+    assert cfg.primary_image_mask_mode in valid_mask_modes, (
+        f"Invalid primary_image_mask_mode={cfg.primary_image_mask_mode}; expected one of {sorted(valid_mask_modes)}"
+    )
+    assert cfg.wrist_image_mask_mode in valid_mask_modes, (
+        f"Invalid wrist_image_mask_mode={cfg.wrist_image_mask_mode}; expected one of {sorted(valid_mask_modes)}"
+    )
+
 
 def check_unnorm_key(cfg: PolicyEvalConfig, model) -> None:
     """Check that the model contains the action un-normalization key."""
@@ -321,11 +337,32 @@ def load_initial_states(cfg: PolicyEvalConfig, task_suite, task_id: int, log_fil
         return initial_states, None
 
 
-def prepare_observation(obs, resize_size, flip_images: bool = False):
+def apply_image_mask(image: np.ndarray, mode: str) -> np.ndarray:
+    """Apply an E1.0 audit mask to an image without changing shape or dtype."""
+    if mode == "none":
+        return image
+    if mode == "black":
+        return np.zeros_like(image)
+    if mode == "gray":
+        return np.full_like(image, 127)
+    if mode == "noise":
+        return np.random.randint(0, 256, size=image.shape, dtype=image.dtype)
+    raise ValueError(f"Unsupported image mask mode: {mode}")
+
+
+def prepare_observation(
+    obs,
+    resize_size,
+    flip_images: bool = False,
+    primary_image_mask_mode: str = "none",
+    wrist_image_mask_mode: str = "none",
+):
     """Prepare observation for policy input."""
     # Get preprocessed images
     img = get_libero_image(obs, flip_images)
     wrist_img = get_libero_wrist_image(obs, flip_images)
+    img = apply_image_mask(img, primary_image_mask_mode)
+    wrist_img = apply_image_mask(wrist_img, wrist_image_mask_mode)
 
     # Prepare observations dict
     observation = {
@@ -405,7 +442,13 @@ def run_episode(
                 continue
 
             # Prepare observation
-            observation = prepare_observation(obs, resize_size, cfg.flip_images)
+            observation = prepare_observation(
+                obs,
+                resize_size,
+                cfg.flip_images,
+                cfg.primary_image_mask_mode,
+                cfg.wrist_image_mask_mode,
+            )
             replay_images.append(observation["primary_image"])
             if replay_wrist_images is not None:
                 replay_wrist_images.append(observation["wrist_image"])
@@ -478,12 +521,16 @@ def run_episode(
                                 future_proprio_latent_idx=action_return_dict["latent_indices"][
                                     "future_proprio_latent_idx"
                                 ],
-                                future_wrist_image_latent_idx=action_return_dict["latent_indices"][
-                                    "future_wrist_image_latent_idx"
-                                ],
-                                future_wrist_image2_latent_idx=action_return_dict["latent_indices"][
-                                    "future_wrist_image2_latent_idx"
-                                ],
+                                future_wrist_image_latent_idx=(
+                                    action_return_dict["latent_indices"]["future_wrist_image_latent_idx"]
+                                    if cfg.use_wrist_image
+                                    else -1
+                                ),
+                                future_wrist_image2_latent_idx=(
+                                    action_return_dict["latent_indices"]["future_wrist_image2_latent_idx"]
+                                    if cfg.use_wrist_image and cfg.num_wrist_images == 2
+                                    else -1
+                                ),
                                 future_image_latent_idx=action_return_dict["latent_indices"]["future_image_latent_idx"],
                                 future_image2_latent_idx=action_return_dict["latent_indices"][
                                     "future_image2_latent_idx"
@@ -780,6 +827,24 @@ def run_task(
     log_message(f"Current task success rate: {task_success_rate}", log_file)
     log_message(f"Current total success rate: {total_success_rate}", log_file)
 
+    if cfg.per_task_jsonl:
+        import json as _json_task
+
+        record = {
+            "mode": "standard",
+            "task_suite_name": cfg.task_suite_name,
+            "task_id": task_id,
+            "task_name": task.name,
+            "task_description": task_description,
+            "primary_image_mask_mode": cfg.primary_image_mask_mode,
+            "wrist_image_mask_mode": cfg.wrist_image_mask_mode,
+            "successes": task_successes,
+            "trials": task_episodes,
+        }
+        os.makedirs(os.path.dirname(os.path.abspath(cfg.per_task_jsonl)), exist_ok=True)
+        with open(cfg.per_task_jsonl, "a") as _jf:
+            _jf.write(_json_task.dumps(record) + "\n")
+
     # Log to wandb if enabled
     if cfg.use_wandb:
         wandb.log(
@@ -794,6 +859,97 @@ def run_task(
         total_episodes,
         total_successes,
     )
+
+
+def run_camera_task(
+    cfg: PolicyEvalConfig,
+    camera_task_name: str,
+    base_task_language: str,
+    base_task_init_states,
+    model,
+    planning_model,
+    dataset_stats,
+    worker_pool,
+    resize_size,
+    total_episodes=0,
+    total_successes=0,
+    log_file=None,
+):
+    """Run evaluation for a single LIBERO-Plus camera-viewpoint task."""
+    import torch as _torch
+    from libero.libero import get_libero_path
+    from libero.libero.envs import OffScreenRenderEnv
+
+    # Synthetic BDDL path without .bddl extension — env_wrapper parses _view_ + _initstate_ from it
+    bddl_files_root = get_libero_path("bddl_files")
+    synthetic_bddl_path = os.path.join(bddl_files_root, cfg.task_suite_name, camera_task_name)
+
+    env = OffScreenRenderEnv(
+        bddl_file_name=synthetic_bddl_path,
+        camera_heights=cfg.env_img_res,
+        camera_widths=cfg.env_img_res,
+    )
+    task_description = base_task_language
+    n_init = len(base_task_init_states)
+
+    task_episodes, task_successes = 0, 0
+    for episode_idx in tqdm.tqdm(range(cfg.num_trials_per_task)):
+        initial_state = base_task_init_states[episode_idx % n_init]
+        log_message(f"\nCamera task: {camera_task_name}", log_file)
+        log_message(f"Starting episode {task_episodes + 1}...", log_file)
+
+        success, replay_images, replay_wrist_images, future_image_predictions_list, collected_data = run_episode(
+            cfg,
+            env,
+            task_description,
+            model,
+            planning_model,
+            dataset_stats,
+            worker_pool,
+            resize_size,
+            initial_state,
+            log_file,
+        )
+
+        task_episodes += 1
+        total_episodes += 1
+        if success:
+            task_successes += 1
+            total_successes += 1
+
+        save_rollout_video(
+            replay_images,
+            total_episodes,
+            success=success,
+            task_description=task_description,
+            log_file=log_file,
+        )
+
+        log_message(f"Success: {success}", log_file)
+        log_message(f"# episodes completed so far: {total_episodes}", log_file)
+        log_message(f"# successes: {total_successes} ({total_successes / total_episodes * 100:.1f}%)", log_file)
+
+    env.close()
+    task_sr = float(task_successes) / float(task_episodes) if task_episodes > 0 else 0
+    log_message(f"Camera task SR: {task_successes}/{task_episodes} ({task_sr * 100:.1f}%)", log_file)
+
+    # Append per-task record for report generation
+    if cfg.per_task_jsonl:
+        import json as _json_task
+        record = {
+            "mode": "camera",
+            "task_suite_name": cfg.task_suite_name,
+            "task_name": camera_task_name,
+            "primary_image_mask_mode": cfg.primary_image_mask_mode,
+            "wrist_image_mask_mode": cfg.wrist_image_mask_mode,
+            "successes": task_successes,
+            "trials": task_episodes,
+        }
+        os.makedirs(os.path.dirname(os.path.abspath(cfg.per_task_jsonl)), exist_ok=True)
+        with open(cfg.per_task_jsonl, "a") as _jf:
+            _jf.write(_json_task.dumps(record) + "\n")
+
+    return total_episodes, total_successes
 
 
 @draccus.wrap()
@@ -898,23 +1054,70 @@ def eval_libero(cfg: PolicyEvalConfig) -> float:
 
     # Start evaluation
     total_episodes, total_successes = 0, 0
-    for task_id in tqdm.tqdm(range(num_tasks)):
-        (
-            total_episodes,
-            total_successes,
-        ) = run_task(
-            cfg,
-            task_suite,
-            task_id,
-            model,
-            planning_model,
-            dataset_stats,
-            worker_pool,
-            resize_size,
-            total_episodes,
-            total_successes,
-            log_file,
-        )
+
+    if cfg.camera_tasks_file:
+        # Camera-viewpoint eval mode: task names contain _view_ and _initstate_ params
+        import json as _json
+        camera_task_names = _json.load(open(cfg.camera_tasks_file))
+        if cfg.num_shards > 1:
+            camera_task_names = [t for i, t in enumerate(camera_task_names) if i % cfg.num_shards == cfg.shard_index]
+            log_message(f"Camera eval mode: {len(camera_task_names)} tasks (shard {cfg.shard_index}/{cfg.num_shards}) from {cfg.camera_tasks_file}", log_file)
+        else:
+            log_message(f"Camera eval mode: {len(camera_task_names)} tasks from {cfg.camera_tasks_file}", log_file)
+
+        # Build base-task lookup: name -> (language, init_states)
+        import torch as _torch
+        base_task_cache = {}
+        for base_idx in range(task_suite.n_tasks):
+            bt = task_suite.get_task(base_idx)
+            base_task_cache[bt.name] = (bt.language, task_suite.get_task_init_states(base_idx))
+
+        for camera_task_name in tqdm.tqdm(camera_task_names):
+            base_name = camera_task_name.split("_view_")[0]
+            if base_name not in base_task_cache:
+                log_message(f"WARNING: base task not found for '{base_name}', skipping", log_file)
+                continue
+            base_language, base_init_states = base_task_cache[base_name]
+            total_episodes, total_successes = run_camera_task(
+                cfg,
+                camera_task_name,
+                base_language,
+                base_init_states,
+                model,
+                planning_model,
+                dataset_stats,
+                worker_pool,
+                resize_size,
+                total_episodes,
+                total_successes,
+                log_file,
+            )
+    else:
+        # Standard task-index eval mode
+        if cfg.task_indices_file:
+            import json as _json
+            task_ids_to_run = _json.load(open(cfg.task_indices_file))
+            log_message(f"Restricting to {len(task_ids_to_run)} tasks from {cfg.task_indices_file}", log_file)
+        else:
+            task_ids_to_run = list(range(num_tasks))
+
+        for task_id in tqdm.tqdm(task_ids_to_run):
+            (
+                total_episodes,
+                total_successes,
+            ) = run_task(
+                cfg,
+                task_suite,
+                task_id,
+                model,
+                planning_model,
+                dataset_stats,
+                worker_pool,
+                resize_size,
+                total_episodes,
+                total_successes,
+                log_file,
+            )
 
     # Calculate final success rate
     final_success_rate = float(total_successes) / float(total_episodes) if total_episodes > 0 else 0
@@ -924,6 +1127,23 @@ def eval_libero(cfg: PolicyEvalConfig) -> float:
     log_message(f"Total episodes: {total_episodes}", log_file)
     log_message(f"Total successes: {total_successes}", log_file)
     log_message(f"Overall success rate: {final_success_rate:.4f} ({final_success_rate * 100:.1f}%)", log_file)
+
+    # Write per-shard JSON for parallel launcher to merge
+    if cfg.shard_results_json:
+        import json as _json_out
+        shard_result = {
+            "shard_index": cfg.shard_index,
+            "num_shards": cfg.num_shards,
+            "total_episodes": total_episodes,
+            "total_successes": total_successes,
+            "success_rate": final_success_rate,
+            "task_suite_name": cfg.task_suite_name,
+        }
+        os.makedirs(os.path.dirname(os.path.abspath(cfg.shard_results_json)), exist_ok=True)
+        with open(cfg.shard_results_json, "w") as _f:
+            _json_out.dump(shard_result, _f, indent=2)
+        log_message(f"Shard results written to {cfg.shard_results_json}", log_file)
+
     # Log to wandb if enabled
     if cfg.use_wandb:
         wandb.log(

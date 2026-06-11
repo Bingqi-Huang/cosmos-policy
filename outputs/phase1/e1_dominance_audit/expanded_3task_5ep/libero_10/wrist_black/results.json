@@ -1,0 +1,8 @@
+{
+  "shard_index": 0,
+  "num_shards": 1,
+  "total_episodes": 15,
+  "total_successes": 3,
+  "success_rate": 0.2,
+  "task_suite_name": "libero_10"
+}

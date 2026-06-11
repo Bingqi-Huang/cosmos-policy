@@ -53,11 +53,12 @@ class IterSpeed(EveryN):
         loss: torch.Tensor,
         iteration: int = 0,
     ) -> None:
+        metric_suffix = self._format_policy_metrics(output_batch)
         if self.hit_counter < self.hit_thres:
             log.info(
                 f"Iteration {iteration}: "
                 f"Hit counter: {self.hit_counter + 1}/{self.hit_thres} | "
-                f"Loss: {loss.item():.4f} | "
+                f"Loss: {loss.item():.4f}{metric_suffix} | "
                 f"Time: {time.time() - self.last_hit_time:.2f}s"
             )
             self.hit_counter += 1
@@ -83,7 +84,10 @@ class IterSpeed(EveryN):
         cur_time = time.time()
         iter_speed = (cur_time - self.time) / self.every_n / self.step_size
 
-        log.info(f"{iteration} : iter_speed {iter_speed:.2f} seconds per iteration | Loss: {loss.item():.4f}")
+        metric_suffix = self._format_policy_metrics(output_batch)
+        log.info(
+            f"{iteration} : iter_speed {iter_speed:.2f} seconds per iteration | Loss: {loss.item():.4f}{metric_suffix}"
+        )
 
         if wandb.run:
             sample_counter = getattr(trainer, "sample_counter", iteration)
@@ -104,3 +108,22 @@ class IterSpeed(EveryN):
                     },
                     f"s3://rundir/{self.name}/iter_{iteration:09d}.yaml",
                 )
+
+    @staticmethod
+    def _format_policy_metrics(output_batch: dict[str, torch.Tensor]) -> str:
+        metric_keys = (
+            "demo_sample_action_l1_loss",
+            "demo_sample_action_mse_loss",
+            "demo_sample_future_proprio_l1_loss",
+            "demo_sample_value_l1_loss",
+        )
+        parts = []
+        for key in metric_keys:
+            value = output_batch.get(key)
+            if value is None:
+                continue
+            value = value.detach().float()
+            if value.numel() != 1 or torch.isnan(value) or torch.isinf(value):
+                continue
+            parts.append(f"{key}: {value.item():.6f}")
+        return " | " + " | ".join(parts) if parts else ""

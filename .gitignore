@@ -1,2 +1,16 @@
 /.cuda-name
 /build
+/.venv
+/LIBERO-Cosmos-Policy
+__pycache__/
+*.py[cod]
+/rollouts/
+
+# Training checkpoints (large model weights, ~30GB+)
+/outputs/phase1/cosmos_policy/
+
+# Model weight files
+*.pt
+*.pth
+*.bin
+*.safetensors

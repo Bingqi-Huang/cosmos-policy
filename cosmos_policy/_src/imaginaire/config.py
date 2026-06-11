@@ -272,6 +272,8 @@ class CheckpointConfig:
     save_to_object_store: ObjectStoreConfig = attrs.field(factory=ObjectStoreConfig)
     # Save the checkpoint every N iterations.
     save_iter: int = 999999999
+    # Save only model weights. Intended for diagnostics or export-style checkpoints; full training resumes need this False.
+    save_only_model: bool = False
     # Configs for loading the checkpoints from object store.
     load_from_object_store: ObjectStoreConfig = attrs.field(factory=ObjectStoreConfig)
     # Path of model weights to resume the checkpoint from.

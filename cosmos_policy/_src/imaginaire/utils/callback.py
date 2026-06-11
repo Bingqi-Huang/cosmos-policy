@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 import warnings
 from typing import TYPE_CHECKING, Any, Callable, Optional
@@ -97,7 +98,14 @@ class CallBackGroup:
                 assert hasattr(callback, method_name)
                 method = getattr(callback, method_name)
                 assert callable(method)
+                debug_callbacks = (
+                    method_name == "on_training_step_end" and os.environ.get("COSMOS_DEBUG_CALLBACKS") == "1"
+                )
+                if debug_callbacks and distributed.is_rank0():
+                    log.critical(f"Callback start: {callback.__class__.__name__}.{method_name}")
                 _ = method(*args, **kwargs)
+                if debug_callbacks and distributed.is_rank0():
+                    log.critical(f"Callback done: {callback.__class__.__name__}.{method_name}")
 
         return multi_callback_wrapper
 

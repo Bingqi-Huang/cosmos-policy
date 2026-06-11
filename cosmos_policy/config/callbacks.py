@@ -29,6 +29,12 @@ from cosmos_policy._src.imaginaire.utils.easy_io import easy_io
 from cosmos_policy._src.predict2.callbacks.wandb_log import _LossRecord
 
 
+def _to_stat_tensor(value: float | torch.Tensor) -> torch.Tensor:
+    if isinstance(value, torch.Tensor):
+        return value.detach().float()
+    return torch.tensor(float(value), device="cuda")
+
+
 @dataclass
 class _LossRecordNoEDM:
     loss: float = 0
@@ -38,11 +44,14 @@ class _LossRecordNoEDM:
         self.loss = 0
         self.iter_count = 0
 
-    def get_stat(self) -> Tuple[float, float]:
-        if self.iter_count > 0:
-            avg_loss = self.loss / self.iter_count
-            dist.all_reduce(avg_loss, op=dist.ReduceOp.AVG)
-            avg_loss = avg_loss.item()
+    def get_stat(self) -> float:
+        loss_sum = _to_stat_tensor(self.loss)
+        count = torch.tensor(float(self.iter_count), device=loss_sum.device)
+        if dist.is_available() and dist.is_initialized():
+            dist.all_reduce(loss_sum, op=dist.ReduceOp.SUM)
+            dist.all_reduce(count, op=dist.ReduceOp.SUM)
+        if count.item() > 0:
+            avg_loss = (loss_sum / count).item()
         else:
             avg_loss = 0
         self.reset()
@@ -124,6 +133,9 @@ class WandbCallback(WandBCallbackImage):
         loss: torch.Tensor,
         iteration: int = 0,
     ) -> None:
+        if getattr(self.config.job, "wandb_mode", None) == "disabled":
+            return
+
         skip_update_due_to_unstable_loss = False
         if torch.isnan(loss) or torch.isinf(loss):
             skip_update_due_to_unstable_loss = True

@@ -1,0 +1,519 @@
+Eval config: PolicyEvalConfig(suite='libero', model_family='cosmos', config='cosmos_predict2_2b_480p_libero__inference_only', ckpt_path='nvidia/Cosmos-Policy-LIBERO-Predict2-2B', planning_model_config_name='', planning_model_ckpt_path='', config_file='cosmos_policy/config/config.py', use_third_person_image=True, num_third_person_images=1, use_wrist_image=True, num_wrist_images=1, primary_image_mask_mode='noise', wrist_image_mask_mode='none', use_proprio=True, flip_images=True, use_variance_scale=False, use_jpeg_compression=True, ar_future_prediction=False, ar_value_prediction=False, ar_qvalue_prediction=False, num_denoising_steps_action=5, num_denoising_steps_future_state=1, num_denoising_steps_value=1, unnormalize_actions=True, normalize_proprio=True, dataset_stats_path='nvidia/Cosmos-Policy-LIBERO-Predict2-2B/libero_dataset_statistics.json', t5_text_embeddings_path='nvidia/Cosmos-Policy-LIBERO-Predict2-2B/libero_t5_embeddings.pkl', trained_with_image_aug=True, chunk_size=16, num_open_loop_steps=16, deterministic=True, deterministic_reset=False, deterministic_reset_seed=None, use_ensemble_future_state_predictions=False, num_future_state_predictions_in_ensemble=3, future_state_ensemble_aggregation_scheme='average', use_ensemble_value_predictions=False, num_value_predictions_in_ensemble=5, value_ensemble_aggregation_scheme='average', search_depth=1, mask_current_state_action_for_value_prediction=False, mask_future_state_for_qvalue_prediction=False, num_queries_best_of_n=1, use_parallel_inference=False, available_gpus='3', parallel_timeout=15, task_suite_name='libero_spatial', num_trials_per_task=5, task_indices_file='outputs/phase1/e1_dominance_audit/expanded_3task_5ep/task_indices.json', camera_tasks_file='', num_shards=1, shard_index=0, shard_results_json='outputs/phase1/e1_dominance_audit/expanded_3task_5ep/libero_spatial/primary_noise/results.json', per_task_jsonl='outputs/phase1/e1_dominance_audit/expanded_3task_5ep/libero_spatial/primary_noise/per_task.jsonl', initial_states_path='DEFAULT', env_img_res=256, local_log_dir='outputs/phase1/e1_dominance_audit/expanded_3task_5ep/libero_spatial/primary_noise/logs', run_id_note='e1_expand_libero_spatial_primary_noise', use_wandb=False, wandb_entity='YOUR_ENTITY', wandb_project='YOUR_PROJECT', seed=195, randomize_seed=False, data_collection=False, jpeg_compress=True)
+Using serial inference (parallel inference disabled)
+Task suite: libero_spatial
+Number of tasks: 10
+Restricting to 3 tasks from outputs/phase1/e1_dominance_audit/expanded_3task_5ep/task_indices.json
+Using default initial states
+
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Starting episode 1...
+Query 1/1: Action query time = 1.242 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4676
+t=10: Selected seed 195 with value = 0.4676
+Query 1/1: Action query time = 0.827 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5626
+t=26: Selected seed 195 with value = 0.5626
+Query 1/1: Action query time = 0.617 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6228
+t=42: Selected seed 195 with value = 0.6228
+Query 1/1: Action query time = 0.585 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7637
+t=58: Selected seed 195 with value = 0.7637
+Query 1/1: Action query time = 0.544 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8952
+t=74: Selected seed 195 with value = 0.8952
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=1--success=True--task=pick_up_the_black_bowl_between_the_plate.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=1--success=True--task=pick_up_the_black_bowl_between_the_.mp4
+Success: True
+# episodes completed so far: 1
+# successes: 1 (100.0%)
+
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Starting episode 2...
+Query 1/1: Action query time = 0.501 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4548
+t=10: Selected seed 195 with value = 0.4548
+Query 1/1: Action query time = 0.489 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5682
+t=26: Selected seed 195 with value = 0.5682
+Query 1/1: Action query time = 0.484 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6452
+t=42: Selected seed 195 with value = 0.6452
+Query 1/1: Action query time = 0.493 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7352
+t=58: Selected seed 195 with value = 0.7352
+Query 1/1: Action query time = 0.484 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8986
+t=74: Selected seed 195 with value = 0.8986
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=2--success=True--task=pick_up_the_black_bowl_between_the_plate.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=2--success=True--task=pick_up_the_black_bowl_between_the_.mp4
+Success: True
+# episodes completed so far: 2
+# successes: 2 (100.0%)
+
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Starting episode 3...
+Query 1/1: Action query time = 0.494 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4520
+t=10: Selected seed 195 with value = 0.4520
+Query 1/1: Action query time = 0.495 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5392
+t=26: Selected seed 195 with value = 0.5392
+Query 1/1: Action query time = 0.493 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6589
+t=42: Selected seed 195 with value = 0.6589
+Query 1/1: Action query time = 0.479 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7778
+t=58: Selected seed 195 with value = 0.7778
+Query 1/1: Action query time = 0.482 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8767
+t=74: Selected seed 195 with value = 0.8767
+Query 1/1: Action query time = 0.484 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9991
+t=90: Selected seed 195 with value = 0.9991
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=3--success=True--task=pick_up_the_black_bowl_between_the_plate.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=3--success=True--task=pick_up_the_black_bowl_between_the_.mp4
+Success: True
+# episodes completed so far: 3
+# successes: 3 (100.0%)
+
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Starting episode 4...
+Query 1/1: Action query time = 0.493 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4311
+t=10: Selected seed 195 with value = 0.4311
+Query 1/1: Action query time = 0.479 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5402
+t=26: Selected seed 195 with value = 0.5402
+Query 1/1: Action query time = 0.482 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6133
+t=42: Selected seed 195 with value = 0.6133
+Query 1/1: Action query time = 0.480 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7459
+t=58: Selected seed 195 with value = 0.7459
+Query 1/1: Action query time = 0.486 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8866
+t=74: Selected seed 195 with value = 0.8866
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=4--success=True--task=pick_up_the_black_bowl_between_the_plate.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=4--success=True--task=pick_up_the_black_bowl_between_the_.mp4
+Success: True
+# episodes completed so far: 4
+# successes: 4 (100.0%)
+
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Starting episode 5...
+Query 1/1: Action query time = 0.507 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4169
+t=10: Selected seed 195 with value = 0.4169
+Query 1/1: Action query time = 0.483 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5568
+t=26: Selected seed 195 with value = 0.5568
+Query 1/1: Action query time = 0.478 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6169
+t=42: Selected seed 195 with value = 0.6169
+Query 1/1: Action query time = 0.480 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7631
+t=58: Selected seed 195 with value = 0.7631
+Query 1/1: Action query time = 0.478 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8684
+t=74: Selected seed 195 with value = 0.8684
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=5--success=True--task=pick_up_the_black_bowl_between_the_plate.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=5--success=True--task=pick_up_the_black_bowl_between_the_.mp4
+Success: True
+# episodes completed so far: 5
+# successes: 5 (100.0%)
+Current task success rate: 1.0
+Current total success rate: 1.0
+Using default initial states
+
+Task: pick up the black bowl next to the ramekin and place it on the plate
+Starting episode 1...
+Query 1/1: Action query time = 0.489 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3261
+t=10: Selected seed 195 with value = 0.3261
+Query 1/1: Action query time = 0.480 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3483
+t=26: Selected seed 195 with value = 0.3483
+Query 1/1: Action query time = 0.481 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4105
+t=42: Selected seed 195 with value = 0.4105
+Query 1/1: Action query time = 0.480 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4872
+t=58: Selected seed 195 with value = 0.4872
+Query 1/1: Action query time = 0.479 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6189
+t=74: Selected seed 195 with value = 0.6189
+Query 1/1: Action query time = 0.481 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7489
+t=90: Selected seed 195 with value = 0.7489
+Query 1/1: Action query time = 0.578 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8438
+t=106: Selected seed 195 with value = 0.8438
+Query 1/1: Action query time = 0.479 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8419
+t=122: Selected seed 195 with value = 0.8419
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=6--success=True--task=pick_up_the_black_bowl_next_to_the_ramek.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=6--success=True--task=pick_up_the_black_bowl_next_to_the_.mp4
+Success: True
+# episodes completed so far: 6
+# successes: 6 (100.0%)
+
+Task: pick up the black bowl next to the ramekin and place it on the plate
+Starting episode 2...
+Query 1/1: Action query time = 0.490 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3076
+t=10: Selected seed 195 with value = 0.3076
+Query 1/1: Action query time = 0.477 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4300
+t=26: Selected seed 195 with value = 0.4300
+Query 1/1: Action query time = 0.478 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4784
+t=42: Selected seed 195 with value = 0.4784
+Query 1/1: Action query time = 0.480 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4828
+t=58: Selected seed 195 with value = 0.4828
+Query 1/1: Action query time = 0.476 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6919
+t=74: Selected seed 195 with value = 0.6919
+Query 1/1: Action query time = 0.482 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7950
+t=90: Selected seed 195 with value = 0.7950
+Query 1/1: Action query time = 0.529 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9242
+t=106: Selected seed 195 with value = 0.9242
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=7--success=True--task=pick_up_the_black_bowl_next_to_the_ramek.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=7--success=True--task=pick_up_the_black_bowl_next_to_the_.mp4
+Success: True
+# episodes completed so far: 7
+# successes: 7 (100.0%)
+
+Task: pick up the black bowl next to the ramekin and place it on the plate
+Starting episode 3...
+Query 1/1: Action query time = 0.484 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3400
+t=10: Selected seed 195 with value = 0.3400
+Query 1/1: Action query time = 0.476 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4189
+t=26: Selected seed 195 with value = 0.4189
+Query 1/1: Action query time = 0.474 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4408
+t=42: Selected seed 195 with value = 0.4408
+Query 1/1: Action query time = 0.472 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5110
+t=58: Selected seed 195 with value = 0.5110
+Query 1/1: Action query time = 0.472 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6146
+t=74: Selected seed 195 with value = 0.6146
+Query 1/1: Action query time = 0.480 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7030
+t=90: Selected seed 195 with value = 0.7030
+Query 1/1: Action query time = 0.480 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8126
+t=106: Selected seed 195 with value = 0.8126
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=8--success=True--task=pick_up_the_black_bowl_next_to_the_ramek.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=8--success=True--task=pick_up_the_black_bowl_next_to_the_.mp4
+Success: True
+# episodes completed so far: 8
+# successes: 8 (100.0%)
+
+Task: pick up the black bowl next to the ramekin and place it on the plate
+Starting episode 4...
+Query 1/1: Action query time = 0.490 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3239
+t=10: Selected seed 195 with value = 0.3239
+Query 1/1: Action query time = 0.483 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3408
+t=26: Selected seed 195 with value = 0.3408
+Query 1/1: Action query time = 0.486 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4548
+t=42: Selected seed 195 with value = 0.4548
+Query 1/1: Action query time = 0.486 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4514
+t=58: Selected seed 195 with value = 0.4514
+Query 1/1: Action query time = 0.481 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6011
+t=74: Selected seed 195 with value = 0.6011
+Query 1/1: Action query time = 0.480 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7576
+t=90: Selected seed 195 with value = 0.7576
+Query 1/1: Action query time = 0.478 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9095
+t=106: Selected seed 195 with value = 0.9095
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=9--success=True--task=pick_up_the_black_bowl_next_to_the_ramek.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=9--success=True--task=pick_up_the_black_bowl_next_to_the_.mp4
+Success: True
+# episodes completed so far: 9
+# successes: 9 (100.0%)
+
+Task: pick up the black bowl next to the ramekin and place it on the plate
+Starting episode 5...
+Query 1/1: Action query time = 0.487 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2857
+t=10: Selected seed 195 with value = 0.2857
+Query 1/1: Action query time = 0.487 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3479
+t=26: Selected seed 195 with value = 0.3479
+Query 1/1: Action query time = 0.478 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4693
+t=42: Selected seed 195 with value = 0.4693
+Query 1/1: Action query time = 0.478 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4649
+t=58: Selected seed 195 with value = 0.4649
+Query 1/1: Action query time = 0.481 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5808
+t=74: Selected seed 195 with value = 0.5808
+Query 1/1: Action query time = 0.486 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7380
+t=90: Selected seed 195 with value = 0.7380
+Query 1/1: Action query time = 0.485 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8844
+t=106: Selected seed 195 with value = 0.8844
+Query 1/1: Action query time = 0.489 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9364
+t=122: Selected seed 195 with value = 0.9364
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=10--success=True--task=pick_up_the_black_bowl_next_to_the_ramek.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=10--success=True--task=pick_up_the_black_bowl_next_to_the_.mp4
+Success: True
+# episodes completed so far: 10
+# successes: 10 (100.0%)
+Current task success rate: 1.0
+Current total success rate: 1.0
+Using default initial states
+
+Task: pick up the black bowl from table center and place it on the plate
+Starting episode 1...
+Query 1/1: Action query time = 0.480 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3959
+t=10: Selected seed 195 with value = 0.3959
+Query 1/1: Action query time = 0.478 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4375
+t=26: Selected seed 195 with value = 0.4375
+Query 1/1: Action query time = 0.529 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4963
+t=42: Selected seed 195 with value = 0.4963
+Query 1/1: Action query time = 0.474 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6055
+t=58: Selected seed 195 with value = 0.6055
+Query 1/1: Action query time = 0.529 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7234
+t=74: Selected seed 195 with value = 0.7234
+Query 1/1: Action query time = 0.479 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8569
+t=90: Selected seed 195 with value = 0.8569
+Query 1/1: Action query time = 0.480 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9987
+t=106: Selected seed 195 with value = 0.9987
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=11--success=True--task=pick_up_the_black_bowl_from_table_center.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=11--success=True--task=pick_up_the_black_bowl_from_table_c.mp4
+Success: True
+# episodes completed so far: 11
+# successes: 11 (100.0%)
+
+Task: pick up the black bowl from table center and place it on the plate
+Starting episode 2...
+Query 1/1: Action query time = 0.546 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3644
+t=10: Selected seed 195 with value = 0.3644
+Query 1/1: Action query time = 0.477 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4237
+t=26: Selected seed 195 with value = 0.4237
+Query 1/1: Action query time = 0.483 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4764
+t=42: Selected seed 195 with value = 0.4764
+Query 1/1: Action query time = 0.477 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6081
+t=58: Selected seed 195 with value = 0.6081
+Query 1/1: Action query time = 0.497 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7514
+t=74: Selected seed 195 with value = 0.7514
+Query 1/1: Action query time = 0.476 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9060
+t=90: Selected seed 195 with value = 0.9060
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=12--success=True--task=pick_up_the_black_bowl_from_table_center.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=12--success=True--task=pick_up_the_black_bowl_from_table_c.mp4
+Success: True
+# episodes completed so far: 12
+# successes: 12 (100.0%)
+
+Task: pick up the black bowl from table center and place it on the plate
+Starting episode 3...
+Query 1/1: Action query time = 0.491 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3735
+t=10: Selected seed 195 with value = 0.3735
+Query 1/1: Action query time = 0.483 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4118
+t=26: Selected seed 195 with value = 0.4118
+Query 1/1: Action query time = 0.486 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4983
+t=42: Selected seed 195 with value = 0.4983
+Query 1/1: Action query time = 0.488 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6358
+t=58: Selected seed 195 with value = 0.6358
+Query 1/1: Action query time = 0.479 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7897
+t=74: Selected seed 195 with value = 0.7897
+Query 1/1: Action query time = 0.478 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9377
+t=90: Selected seed 195 with value = 0.9377
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=13--success=True--task=pick_up_the_black_bowl_from_table_center.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=13--success=True--task=pick_up_the_black_bowl_from_table_c.mp4
+Success: True
+# episodes completed so far: 13
+# successes: 13 (100.0%)
+
+Task: pick up the black bowl from table center and place it on the plate
+Starting episode 4...
+Query 1/1: Action query time = 0.492 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3707
+t=10: Selected seed 195 with value = 0.3707
+Query 1/1: Action query time = 0.477 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4178
+t=26: Selected seed 195 with value = 0.4178
+Query 1/1: Action query time = 0.478 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4749
+t=42: Selected seed 195 with value = 0.4749
+Query 1/1: Action query time = 0.470 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6614
+t=58: Selected seed 195 with value = 0.6614
+Query 1/1: Action query time = 0.469 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8106
+t=74: Selected seed 195 with value = 0.8106
+Query 1/1: Action query time = 0.471 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9505
+t=90: Selected seed 195 with value = 0.9505
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=14--success=True--task=pick_up_the_black_bowl_from_table_center.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=14--success=True--task=pick_up_the_black_bowl_from_table_c.mp4
+Success: True
+# episodes completed so far: 14
+# successes: 14 (100.0%)
+
+Task: pick up the black bowl from table center and place it on the plate
+Starting episode 5...
+Query 1/1: Action query time = 0.490 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3909
+t=10: Selected seed 195 with value = 0.3909
+Query 1/1: Action query time = 0.478 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4120
+t=26: Selected seed 195 with value = 0.4120
+Query 1/1: Action query time = 0.480 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5330
+t=42: Selected seed 195 with value = 0.5330
+Query 1/1: Action query time = 0.483 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6030
+t=58: Selected seed 195 with value = 0.6030
+Query 1/1: Action query time = 0.480 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6730
+t=74: Selected seed 195 with value = 0.6730
+Query 1/1: Action query time = 0.477 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8622
+t=90: Selected seed 195 with value = 0.8622
+Query 1/1: Action query time = 0.478 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9866
+t=106: Selected seed 195 with value = 0.9866
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--episode=15--success=True--task=pick_up_the_black_bowl_from_table_center.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-20_56_15--with_future_img--episode=15--success=True--task=pick_up_the_black_bowl_from_table_c.mp4
+Success: True
+# episodes completed so far: 15
+# successes: 15 (100.0%)
+Current task success rate: 1.0
+Current total success rate: 1.0
+Final results:
+Total episodes: 15
+Total successes: 15
+Overall success rate: 1.0000 (100.0%)
+Shard results written to outputs/phase1/e1_dominance_audit/expanded_3task_5ep/libero_spatial/primary_noise/results.json

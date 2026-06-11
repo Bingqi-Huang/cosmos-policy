@@ -1,0 +1,193 @@
+{
+  "suites": [
+    "libero_spatial",
+    "libero_object",
+    "libero_goal",
+    "libero_10"
+  ],
+  "mask_jobs": [
+    {
+      "label": "none",
+      "primary_image_mask_mode": "none",
+      "wrist_image_mask_mode": "none"
+    },
+    {
+      "label": "primary_black",
+      "primary_image_mask_mode": "black",
+      "wrist_image_mask_mode": "none"
+    },
+    {
+      "label": "primary_gray",
+      "primary_image_mask_mode": "gray",
+      "wrist_image_mask_mode": "none"
+    },
+    {
+      "label": "primary_noise",
+      "primary_image_mask_mode": "noise",
+      "wrist_image_mask_mode": "none"
+    },
+    {
+      "label": "wrist_black",
+      "primary_image_mask_mode": "none",
+      "wrist_image_mask_mode": "black"
+    },
+    {
+      "label": "wrist_gray",
+      "primary_image_mask_mode": "none",
+      "wrist_image_mask_mode": "gray"
+    },
+    {
+      "label": "wrist_noise",
+      "primary_image_mask_mode": "none",
+      "wrist_image_mask_mode": "noise"
+    }
+  ],
+  "task_ids": [
+    0,
+    1,
+    2
+  ],
+  "num_trials_per_task": 5,
+  "jobs": [
+    {
+      "suite": "libero_spatial",
+      "label": "none",
+      "gpu": "0"
+    },
+    {
+      "suite": "libero_spatial",
+      "label": "primary_black",
+      "gpu": "1"
+    },
+    {
+      "suite": "libero_spatial",
+      "label": "primary_gray",
+      "gpu": "2"
+    },
+    {
+      "suite": "libero_spatial",
+      "label": "primary_noise",
+      "gpu": "3"
+    },
+    {
+      "suite": "libero_spatial",
+      "label": "wrist_black",
+      "gpu": "4"
+    },
+    {
+      "suite": "libero_spatial",
+      "label": "wrist_gray",
+      "gpu": "5"
+    },
+    {
+      "suite": "libero_spatial",
+      "label": "wrist_noise",
+      "gpu": "0"
+    },
+    {
+      "suite": "libero_object",
+      "label": "none",
+      "gpu": "1"
+    },
+    {
+      "suite": "libero_object",
+      "label": "primary_black",
+      "gpu": "2"
+    },
+    {
+      "suite": "libero_object",
+      "label": "primary_gray",
+      "gpu": "3"
+    },
+    {
+      "suite": "libero_object",
+      "label": "primary_noise",
+      "gpu": "4"
+    },
+    {
+      "suite": "libero_object",
+      "label": "wrist_black",
+      "gpu": "5"
+    },
+    {
+      "suite": "libero_object",
+      "label": "wrist_gray",
+      "gpu": "0"
+    },
+    {
+      "suite": "libero_object",
+      "label": "wrist_noise",
+      "gpu": "1"
+    },
+    {
+      "suite": "libero_goal",
+      "label": "none",
+      "gpu": "2"
+    },
+    {
+      "suite": "libero_goal",
+      "label": "primary_black",
+      "gpu": "3"
+    },
+    {
+      "suite": "libero_goal",
+      "label": "primary_gray",
+      "gpu": "4"
+    },
+    {
+      "suite": "libero_goal",
+      "label": "primary_noise",
+      "gpu": "5"
+    },
+    {
+      "suite": "libero_goal",
+      "label": "wrist_black",
+      "gpu": "0"
+    },
+    {
+      "suite": "libero_goal",
+      "label": "wrist_gray",
+      "gpu": "1"
+    },
+    {
+      "suite": "libero_goal",
+      "label": "wrist_noise",
+      "gpu": "2"
+    },
+    {
+      "suite": "libero_10",
+      "label": "none",
+      "gpu": "3"
+    },
+    {
+      "suite": "libero_10",
+      "label": "primary_black",
+      "gpu": "4"
+    },
+    {
+      "suite": "libero_10",
+      "label": "primary_gray",
+      "gpu": "5"
+    },
+    {
+      "suite": "libero_10",
+      "label": "primary_noise",
+      "gpu": "0"
+    },
+    {
+      "suite": "libero_10",
+      "label": "wrist_black",
+      "gpu": "1"
+    },
+    {
+      "suite": "libero_10",
+      "label": "wrist_gray",
+      "gpu": "2"
+    },
+    {
+      "suite": "libero_10",
+      "label": "wrist_noise",
+      "gpu": "3"
+    }
+  ]
+}

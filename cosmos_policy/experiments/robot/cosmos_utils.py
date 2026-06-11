@@ -78,6 +78,11 @@ def get_latent_indices_from_model_config(model):
                       future_proprio, future_wrist, future_third_person_img, value]
             Returns: (1, 3, 5, 7)
 
+        LIBERO scene-only (state_t=7, min_conditional_frames=3):
+            Sequence: [blank, curr_proprio, curr_third_person_img, action,
+                      future_proprio, future_third_person_img, value]
+            Returns: (1, 2, 4, 5)
+
         RoboCasa (state_t=11, min_conditional_frames=5):
             Sequence: [blank, curr_proprio, curr_wrist_img, curr_third_person_img_left, curr_third_person_img_right, action,
                       future_proprio, future_wrist_img, future_third_person_img_left, future_third_person_img_right, value]
@@ -94,6 +99,9 @@ def get_latent_indices_from_model_config(model):
     if state_t == 9 and min_conditional_frames == 4:
         # LIBERO setup
         return (1, 3, 5, 7)
+    elif state_t == 7 and min_conditional_frames == 3:
+        # LIBERO scene-only setup
+        return (1, 2, 4, 5)
     elif state_t == 11 and min_conditional_frames == 5:
         # RoboCasa/ALOHA setup
         return (1, 4, 6, 9)
@@ -939,6 +947,10 @@ def get_action(
         # Build the raw image sequence that will be fed to the model (and the VAE tokenizer)
         image_sequence = []
         current_sequence_idx = 0  # Used to track which index in the sequence of images we are on
+        current_wrist_image_latent_idx = -1
+        current_wrist_image2_latent_idx = -1
+        future_wrist_image_latent_idx = -1
+        future_wrist_image2_latent_idx = -1
 
         # Add blank placeholder image (special placeholder for 1+T temporal VAE compression)
         primary_image = all_camera_images[IMAGE_IDX]

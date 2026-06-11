@@ -92,6 +92,10 @@ class CosmosPolicyTrainer(ImaginaireTrainer):
                 dataloader_train.sampler.set_epoch(epoch)
                 dataloader_train_iter = iter(dataloader_train)
                 while True:
+                    # Stop before pulling another batch once the requested number of optimizer steps is reached.
+                    if iteration >= self.config.trainer.max_iter:
+                        _end_training = True
+                        break
                     self.callbacks.on_before_dataloading(iteration)
                     try:
                         with (
@@ -107,10 +111,6 @@ class CosmosPolicyTrainer(ImaginaireTrainer):
                         break
                     finally:
                         self.callbacks.on_after_dataloading(iteration)
-                    # If max_iter is reached, exit the training loop.
-                    if iteration >= self.config.trainer.max_iter:
-                        _end_training = True
-                        break
                     # Move all tensors in the data batch to GPU device.
                     data_batch = misc.to(data_batch, device="cuda")
                     # The actual training step.

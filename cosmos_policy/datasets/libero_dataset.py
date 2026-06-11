@@ -78,6 +78,7 @@ class LIBERODataset(Dataset):
         treat_success_rollouts_as_demos: bool = False,
         return_value_function_returns: bool = True,
         gamma: float = 0.99,
+        lazy_load_demos: bool = False,
     ):
         """
         Initialize LIBERO dataset for training.
@@ -103,6 +104,7 @@ class LIBERODataset(Dataset):
             treat_success_rollouts_as_demos (bool): If True, copy successful rollout episodes into demonstration dataset (self.data)
             return_value_function_returns (bool): If True, returns value function returns for rollout episodes
             gamma (float): Discount factor for value function returns
+            lazy_load_demos (bool): If True, store demo metadata at init and read episode arrays on demand.
         """
         self.data_dir = data_dir
         self.chunk_size = chunk_size
@@ -123,6 +125,7 @@ class LIBERODataset(Dataset):
         self.treat_success_rollouts_as_demos = treat_success_rollouts_as_demos
         self.return_value_function_returns = return_value_function_returns
         self.gamma = gamma
+        self.lazy_load_demos = lazy_load_demos
 
         assert self.use_wrist_images or self.use_third_person_images, (
             "Must use at least one of wrist images or third-person images!"
@@ -176,31 +179,6 @@ class LIBERODataset(Dataset):
                     sorted_demo_keys = sorted(demo_keys_list, key=lambda x: int(x.split("_")[1]))
 
                     for demo_key in tqdm(sorted_demo_keys):
-                        # Determine whether the dataset stores raw RGB frames or JPEG bytes
-                        obs_group = f[f"data/{demo_key}/obs"]
-                        # Agent-view (third-person) images
-                        if "agentview_rgb" in obs_group:
-                            images = obs_group["agentview_rgb"][:]  # (T, H, W, 3) uint8
-                        elif "agentview_rgb_jpeg" in obs_group:
-                            images = decode_jpeg_bytes_dataset(obs_group["agentview_rgb_jpeg"])
-                        else:
-                            raise KeyError("Neither 'agentview_rgb' nor 'agentview_rgb_jpeg' found in HDF5 file.")
-                        # Wrist-mounted camera images
-                        if "eye_in_hand_rgb" in obs_group:
-                            wrist_images = obs_group["eye_in_hand_rgb"][:]
-                        elif "eye_in_hand_rgb_jpeg" in obs_group:
-                            wrist_images = decode_jpeg_bytes_dataset(obs_group["eye_in_hand_rgb_jpeg"])
-                        else:
-                            raise KeyError("Neither 'eye_in_hand_rgb' nor 'eye_in_hand_rgb_jpeg' found in HDF5 file.")
-                        # Actions
-                        actions = f[f"data/{demo_key}/actions"][:].astype(
-                            np.float32
-                        )  # (episode_len, action_dim=7), float32
-                        # Proprio states
-                        proprio = f[f"data/{demo_key}/robot_states"][:].astype(
-                            np.float32
-                        )  # (episode_len, proprio_dim=9), float32
-                        # Compute language instruction
                         raw_file_string = os.path.basename(file).split("/")[-1]
                         words = raw_file_string[:-10].split("_")
                         command = ""
@@ -211,23 +189,79 @@ class LIBERODataset(Dataset):
                             command = command + w + " "
                         command = command[:-1]
                         self.unique_commands.add(command)
-                        num_steps = len(images)
+
+                        obs_group = f[f"data/{demo_key}/obs"]
+                        if self.lazy_load_demos:
+                            if "agentview_rgb" in obs_group:
+                                num_steps = len(obs_group["agentview_rgb"])
+                            elif "agentview_rgb_jpeg" in obs_group:
+                                num_steps = len(obs_group["agentview_rgb_jpeg"])
+                            else:
+                                raise KeyError("Neither 'agentview_rgb' nor 'agentview_rgb_jpeg' found in HDF5 file.")
+                            if self.use_wrist_images and (
+                                "eye_in_hand_rgb" not in obs_group and "eye_in_hand_rgb_jpeg" not in obs_group
+                            ):
+                                raise KeyError(
+                                    "Neither 'eye_in_hand_rgb' nor 'eye_in_hand_rgb_jpeg' found in HDF5 file."
+                                )
+                        else:
+                            # Agent-view (third-person) images
+                            if "agentview_rgb" in obs_group:
+                                images = obs_group["agentview_rgb"][:]  # (T, H, W, 3) uint8
+                            elif "agentview_rgb_jpeg" in obs_group:
+                                images = decode_jpeg_bytes_dataset(obs_group["agentview_rgb_jpeg"])
+                            else:
+                                raise KeyError("Neither 'agentview_rgb' nor 'agentview_rgb_jpeg' found in HDF5 file.")
+                            # Wrist-mounted camera images
+                            if self.use_wrist_images:
+                                if "eye_in_hand_rgb" in obs_group:
+                                    wrist_images = obs_group["eye_in_hand_rgb"][:]
+                                elif "eye_in_hand_rgb_jpeg" in obs_group:
+                                    wrist_images = decode_jpeg_bytes_dataset(obs_group["eye_in_hand_rgb_jpeg"])
+                                else:
+                                    raise KeyError(
+                                        "Neither 'eye_in_hand_rgb' nor 'eye_in_hand_rgb_jpeg' found in HDF5 file."
+                                    )
+                            else:
+                                wrist_images = None
+                            # Actions
+                            actions = f[f"data/{demo_key}/actions"][:].astype(
+                                np.float32
+                            )  # (episode_len, action_dim=7), float32
+                            # Proprio states
+                            proprio = f[f"data/{demo_key}/robot_states"][:].astype(
+                                np.float32
+                            )  # (episode_len, proprio_dim=9), float32
+                            num_steps = len(images)
+
                         # Add value function returns if applicable
                         if self.return_value_function_returns:
                             returns = compute_monte_carlo_returns(num_steps, terminal_reward=1.0, gamma=self.gamma)
                         # Add entry to dataset dict
-                        self.data[self.num_episodes] = dict(
-                            images=images,
-                            wrist_images=wrist_images,
-                            proprio=proprio,
-                            actions=actions,
-                            command=command,
-                            num_steps=num_steps,
-                            suite=os.path.relpath(file, self.data_dir).split(os.sep)[
-                                0
-                            ],  # Task suite folder name (e.g. libero_spatial_no_noops_rerendered)
-                            returns=returns.copy() if self.return_value_function_returns else None,
-                        )
+                        suite_name = os.path.relpath(file, self.data_dir).split(os.sep)[
+                            0
+                        ]  # Task suite folder name (e.g. libero_spatial_no_noops_rerendered)
+                        if self.lazy_load_demos:
+                            self.data[self.num_episodes] = dict(
+                                lazy_demo=True,
+                                file_path=file,
+                                demo_key=demo_key,
+                                command=command,
+                                num_steps=num_steps,
+                                suite=suite_name,
+                                returns=returns.copy() if self.return_value_function_returns else None,
+                            )
+                        else:
+                            self.data[self.num_episodes] = dict(
+                                images=images,
+                                wrist_images=wrist_images,
+                                proprio=proprio,
+                                actions=actions,
+                                command=command,
+                                num_steps=num_steps,
+                                suite=suite_name,
+                                returns=returns.copy() if self.return_value_function_returns else None,
+                            )
                         # Update number of episodes
                         self.num_episodes += 1
                         # Update number of steps
@@ -252,9 +286,17 @@ class LIBERODataset(Dataset):
 
         # Normalize actions and/or proprio
         if self.normalize_actions or self.normalize_proprio:
-            if self.normalize_actions:
+            if self.lazy_load_demos and not os.path.exists(
+                os.path.join(self.data_dir, "dataset_statistics_post_norm.json")
+            ):
+                raise RuntimeError(
+                    "lazy_load_demos=True requires precomputed dataset_statistics_post_norm.json "
+                    "because demo arrays are not resident in memory."
+                )
+
+            if self.normalize_actions and not self.lazy_load_demos:
                 self.data = rescale_data(self.data, self.dataset_stats, "actions")
-            if self.normalize_proprio:
+            if self.normalize_proprio and not self.lazy_load_demos:
                 self.data = rescale_data(self.data, self.dataset_stats, "proprio")
 
             # Calculate post-normalization action statistics
@@ -444,10 +486,10 @@ class LIBERODataset(Dataset):
             if episode_metadata["is_jpeg"]:
                 # Store raw JPEG bytes
                 images = f["primary_images_jpeg"][:]
-                wrist_images = f["wrist_images_jpeg"][:]
+                wrist_images = f["wrist_images_jpeg"][:] if self.use_wrist_images else None
             else:
                 images = f["primary_images"][:]
-                wrist_images = f["wrist_images"][:]
+                wrist_images = f["wrist_images"][:] if self.use_wrist_images else None
 
             # Load actions and proprio
             actions = f["actions"][:].astype(np.float32)
@@ -476,6 +518,49 @@ class LIBERODataset(Dataset):
             )
 
             return episode_data
+
+    def _load_demo_episode_data(self, episode_metadata):
+        """Load one demonstration episode from HDF5 when lazy_load_demos=True."""
+        file_path = episode_metadata["file_path"]
+        demo_key = episode_metadata["demo_key"]
+
+        with h5py.File(file_path, "r") as f:
+            obs_group = f[f"data/{demo_key}/obs"]
+            if "agentview_rgb" in obs_group:
+                images = obs_group["agentview_rgb"][:]
+            elif "agentview_rgb_jpeg" in obs_group:
+                images = decode_jpeg_bytes_dataset(obs_group["agentview_rgb_jpeg"])
+            else:
+                raise KeyError("Neither 'agentview_rgb' nor 'agentview_rgb_jpeg' found in HDF5 file.")
+
+            if self.use_wrist_images:
+                if "eye_in_hand_rgb" in obs_group:
+                    wrist_images = obs_group["eye_in_hand_rgb"][:]
+                elif "eye_in_hand_rgb_jpeg" in obs_group:
+                    wrist_images = decode_jpeg_bytes_dataset(obs_group["eye_in_hand_rgb_jpeg"])
+                else:
+                    raise KeyError("Neither 'eye_in_hand_rgb' nor 'eye_in_hand_rgb_jpeg' found in HDF5 file.")
+            else:
+                wrist_images = None
+
+            actions = f[f"data/{demo_key}/actions"][:].astype(np.float32)
+            proprio = f[f"data/{demo_key}/robot_states"][:].astype(np.float32)
+
+        if self.normalize_actions:
+            actions = rescale_episode_data({"actions": actions}, self.dataset_stats, "actions")
+        if self.normalize_proprio:
+            proprio = rescale_episode_data({"proprio": proprio}, self.dataset_stats, "proprio")
+
+        return dict(
+            images=images,
+            wrist_images=wrist_images,
+            proprio=proprio,
+            actions=actions,
+            command=episode_metadata["command"],
+            num_steps=episode_metadata["num_steps"],
+            suite=episode_metadata["suite"],
+            returns=episode_metadata.get("returns"),
+        )
 
     def __len__(self):
         """Returns the total number of samples in the dataset."""
@@ -521,6 +606,8 @@ class LIBERODataset(Dataset):
             episode_idx, relative_step_idx = self._step_to_episode_map[global_step_idx]
             episode_metadata = None
             episode_data = self.data[episode_idx]
+            if episode_data.get("lazy_demo", False):
+                episode_data = self._load_demo_episode_data(episode_data)
             global_rollout_idx = -1  # Not applicable for demonstration data
         elif sample_type == "success_rollout":
             # Success rollout sample
@@ -572,11 +659,15 @@ class LIBERODataset(Dataset):
             if sample_type != "demo" and episode_data["is_jpeg"]:
                 # Decompress JPEG frames
                 decompressed_images[frame_idx] = decode_single_jpeg_frame(episode_data["images"][frame_idx])
-                decompressed_wrist_images[frame_idx] = decode_single_jpeg_frame(episode_data["wrist_images"][frame_idx])
+                if self.use_wrist_images:
+                    decompressed_wrist_images[frame_idx] = decode_single_jpeg_frame(
+                        episode_data["wrist_images"][frame_idx]
+                    )
             else:
                 # Use images as-is
                 decompressed_images[frame_idx] = episode_data["images"][frame_idx]
-                decompressed_wrist_images[frame_idx] = episode_data["wrist_images"][frame_idx]
+                if self.use_wrist_images:
+                    decompressed_wrist_images[frame_idx] = episode_data["wrist_images"][frame_idx]
 
         # Initialize list to store all images
         image_list = []

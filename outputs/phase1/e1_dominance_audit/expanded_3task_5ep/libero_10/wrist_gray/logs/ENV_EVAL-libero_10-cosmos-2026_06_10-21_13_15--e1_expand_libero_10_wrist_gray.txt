@@ -1,0 +1,2119 @@
+Eval config: PolicyEvalConfig(suite='libero', model_family='cosmos', config='cosmos_predict2_2b_480p_libero__inference_only', ckpt_path='nvidia/Cosmos-Policy-LIBERO-Predict2-2B', planning_model_config_name='', planning_model_ckpt_path='', config_file='cosmos_policy/config/config.py', use_third_person_image=True, num_third_person_images=1, use_wrist_image=True, num_wrist_images=1, primary_image_mask_mode='none', wrist_image_mask_mode='gray', use_proprio=True, flip_images=True, use_variance_scale=False, use_jpeg_compression=True, ar_future_prediction=False, ar_value_prediction=False, ar_qvalue_prediction=False, num_denoising_steps_action=5, num_denoising_steps_future_state=1, num_denoising_steps_value=1, unnormalize_actions=True, normalize_proprio=True, dataset_stats_path='nvidia/Cosmos-Policy-LIBERO-Predict2-2B/libero_dataset_statistics.json', t5_text_embeddings_path='nvidia/Cosmos-Policy-LIBERO-Predict2-2B/libero_t5_embeddings.pkl', trained_with_image_aug=True, chunk_size=16, num_open_loop_steps=16, deterministic=True, deterministic_reset=False, deterministic_reset_seed=None, use_ensemble_future_state_predictions=False, num_future_state_predictions_in_ensemble=3, future_state_ensemble_aggregation_scheme='average', use_ensemble_value_predictions=False, num_value_predictions_in_ensemble=5, value_ensemble_aggregation_scheme='average', search_depth=1, mask_current_state_action_for_value_prediction=False, mask_future_state_for_qvalue_prediction=False, num_queries_best_of_n=1, use_parallel_inference=False, available_gpus='2', parallel_timeout=15, task_suite_name='libero_10', num_trials_per_task=5, task_indices_file='outputs/phase1/e1_dominance_audit/expanded_3task_5ep/task_indices.json', camera_tasks_file='', num_shards=1, shard_index=0, shard_results_json='outputs/phase1/e1_dominance_audit/expanded_3task_5ep/libero_10/wrist_gray/results.json', per_task_jsonl='outputs/phase1/e1_dominance_audit/expanded_3task_5ep/libero_10/wrist_gray/per_task.jsonl', initial_states_path='DEFAULT', env_img_res=256, local_log_dir='outputs/phase1/e1_dominance_audit/expanded_3task_5ep/libero_10/wrist_gray/logs', run_id_note='e1_expand_libero_10_wrist_gray', use_wandb=False, wandb_entity='YOUR_ENTITY', wandb_project='YOUR_PROJECT', seed=195, randomize_seed=False, data_collection=False, jpeg_compress=True)
+Using serial inference (parallel inference disabled)
+Task suite: libero_10
+Number of tasks: 10
+Restricting to 3 tasks from outputs/phase1/e1_dominance_audit/expanded_3task_5ep/task_indices.json
+Using default initial states
+
+Task: put both the alphabet soup and the tomato sauce in the basket
+Starting episode 1...
+Query 1/1: Action query time = 1.084 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0658
+t=10: Selected seed 195 with value = 0.0658
+Query 1/1: Action query time = 0.619 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0842
+t=26: Selected seed 195 with value = 0.0842
+Query 1/1: Action query time = 0.563 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1326
+t=42: Selected seed 195 with value = 0.1326
+Query 1/1: Action query time = 0.564 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1547
+t=58: Selected seed 195 with value = 0.1547
+Query 1/1: Action query time = 0.480 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1337
+t=74: Selected seed 195 with value = 0.1337
+Query 1/1: Action query time = 0.482 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1229
+t=90: Selected seed 195 with value = 0.1229
+Query 1/1: Action query time = 0.489 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1059
+t=106: Selected seed 195 with value = 0.1059
+Query 1/1: Action query time = 0.514 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1361
+t=122: Selected seed 195 with value = 0.1361
+Query 1/1: Action query time = 0.548 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1649
+t=138: Selected seed 195 with value = 0.1649
+Query 1/1: Action query time = 0.473 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2359
+t=154: Selected seed 195 with value = 0.2359
+Query 1/1: Action query time = 0.475 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2565
+t=170: Selected seed 195 with value = 0.2565
+Query 1/1: Action query time = 0.476 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2642
+t=186: Selected seed 195 with value = 0.2642
+Query 1/1: Action query time = 0.487 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2942
+t=202: Selected seed 195 with value = 0.2942
+Query 1/1: Action query time = 0.545 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3990
+t=218: Selected seed 195 with value = 0.3990
+Query 1/1: Action query time = 0.475 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4612
+t=234: Selected seed 195 with value = 0.4612
+Query 1/1: Action query time = 0.473 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5152
+t=250: Selected seed 195 with value = 0.5152
+Query 1/1: Action query time = 0.475 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5858
+t=266: Selected seed 195 with value = 0.5858
+Query 1/1: Action query time = 0.473 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4700
+t=282: Selected seed 195 with value = 0.4700
+Query 1/1: Action query time = 0.477 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6252
+t=298: Selected seed 195 with value = 0.6252
+Query 1/1: Action query time = 0.475 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5032
+t=314: Selected seed 195 with value = 0.5032
+Query 1/1: Action query time = 0.477 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3414
+t=330: Selected seed 195 with value = 0.3414
+Query 1/1: Action query time = 0.476 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2926
+t=346: Selected seed 195 with value = 0.2926
+Query 1/1: Action query time = 0.477 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3713
+t=362: Selected seed 195 with value = 0.3713
+Query 1/1: Action query time = 0.479 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4523
+t=378: Selected seed 195 with value = 0.4523
+Query 1/1: Action query time = 0.478 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5214
+t=394: Selected seed 195 with value = 0.5214
+Query 1/1: Action query time = 0.476 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5723
+t=410: Selected seed 195 with value = 0.5723
+Query 1/1: Action query time = 0.472 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5971
+t=426: Selected seed 195 with value = 0.5971
+Query 1/1: Action query time = 0.474 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6696
+t=442: Selected seed 195 with value = 0.6696
+Query 1/1: Action query time = 0.473 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3464
+t=458: Selected seed 195 with value = 0.3464
+Query 1/1: Action query time = 0.471 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3149
+t=474: Selected seed 195 with value = 0.3149
+Query 1/1: Action query time = 0.472 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3174
+t=490: Selected seed 195 with value = 0.3174
+Query 1/1: Action query time = 0.473 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3947
+t=506: Selected seed 195 with value = 0.3947
+Query 1/1: Action query time = 0.473 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5118
+t=522: Selected seed 195 with value = 0.5118
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=1--success=False--task=put_both_the_alphabet_soup_and_the_tomat.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=1--success=False--task=put_both_the_alphabet_soup_and_the_.mp4
+Success: False
+# episodes completed so far: 1
+# successes: 0 (0.0%)
+
+Task: put both the alphabet soup and the tomato sauce in the basket
+Starting episode 2...
+Query 1/1: Action query time = 0.482 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1037
+t=10: Selected seed 195 with value = 0.1037
+Query 1/1: Action query time = 0.491 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0976
+t=26: Selected seed 195 with value = 0.0976
+Query 1/1: Action query time = 0.475 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1122
+t=42: Selected seed 195 with value = 0.1122
+Query 1/1: Action query time = 0.478 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1170
+t=58: Selected seed 195 with value = 0.1170
+Query 1/1: Action query time = 0.478 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0994
+t=74: Selected seed 195 with value = 0.0994
+Query 1/1: Action query time = 0.551 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1742
+t=90: Selected seed 195 with value = 0.1742
+Query 1/1: Action query time = 0.547 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1434
+t=106: Selected seed 195 with value = 0.1434
+Query 1/1: Action query time = 0.549 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1299
+t=122: Selected seed 195 with value = 0.1299
+Query 1/1: Action query time = 0.476 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1400
+t=138: Selected seed 195 with value = 0.1400
+Query 1/1: Action query time = 0.481 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3312
+t=154: Selected seed 195 with value = 0.3312
+Query 1/1: Action query time = 0.476 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3312
+t=170: Selected seed 195 with value = 0.3312
+Query 1/1: Action query time = 0.478 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3724
+t=186: Selected seed 195 with value = 0.3724
+Query 1/1: Action query time = 0.483 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3505
+t=202: Selected seed 195 with value = 0.3505
+Query 1/1: Action query time = 0.476 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3493
+t=218: Selected seed 195 with value = 0.3493
+Query 1/1: Action query time = 0.551 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3847
+t=234: Selected seed 195 with value = 0.3847
+Query 1/1: Action query time = 0.476 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4625
+t=250: Selected seed 195 with value = 0.4625
+Query 1/1: Action query time = 0.476 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5185
+t=266: Selected seed 195 with value = 0.5185
+Query 1/1: Action query time = 0.479 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5876
+t=282: Selected seed 195 with value = 0.5876
+Query 1/1: Action query time = 0.479 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4461
+t=298: Selected seed 195 with value = 0.4461
+Query 1/1: Action query time = 0.551 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4986
+t=314: Selected seed 195 with value = 0.4986
+Query 1/1: Action query time = 0.489 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5337
+t=330: Selected seed 195 with value = 0.5337
+Query 1/1: Action query time = 0.484 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6189
+t=346: Selected seed 195 with value = 0.6189
+Query 1/1: Action query time = 0.488 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4945
+t=362: Selected seed 195 with value = 0.4945
+Query 1/1: Action query time = 0.487 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4535
+t=378: Selected seed 195 with value = 0.4535
+Query 1/1: Action query time = 0.479 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4815
+t=394: Selected seed 195 with value = 0.4815
+Query 1/1: Action query time = 0.478 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5617
+t=410: Selected seed 195 with value = 0.5617
+Query 1/1: Action query time = 0.476 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4464
+t=426: Selected seed 195 with value = 0.4464
+Query 1/1: Action query time = 0.475 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6685
+t=442: Selected seed 195 with value = 0.6685
+Query 1/1: Action query time = 0.474 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3812
+t=458: Selected seed 195 with value = 0.3812
+Query 1/1: Action query time = 0.475 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3621
+t=474: Selected seed 195 with value = 0.3621
+Query 1/1: Action query time = 0.482 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3115
+t=490: Selected seed 195 with value = 0.3115
+Query 1/1: Action query time = 0.479 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3775
+t=506: Selected seed 195 with value = 0.3775
+Query 1/1: Action query time = 0.483 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4199
+t=522: Selected seed 195 with value = 0.4199
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=2--success=False--task=put_both_the_alphabet_soup_and_the_tomat.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=2--success=False--task=put_both_the_alphabet_soup_and_the_.mp4
+Success: False
+# episodes completed so far: 2
+# successes: 0 (0.0%)
+
+Task: put both the alphabet soup and the tomato sauce in the basket
+Starting episode 3...
+Query 1/1: Action query time = 0.487 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0934
+t=10: Selected seed 195 with value = 0.0934
+Query 1/1: Action query time = 0.478 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0998
+t=26: Selected seed 195 with value = 0.0998
+Query 1/1: Action query time = 0.475 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1341
+t=42: Selected seed 195 with value = 0.1341
+Query 1/1: Action query time = 0.479 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1049
+t=58: Selected seed 195 with value = 0.1049
+Query 1/1: Action query time = 0.483 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0609
+t=74: Selected seed 195 with value = 0.0609
+Query 1/1: Action query time = 0.475 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1423
+t=90: Selected seed 195 with value = 0.1423
+Query 1/1: Action query time = 0.476 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0997
+t=106: Selected seed 195 with value = 0.0997
+Query 1/1: Action query time = 0.485 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0890
+t=122: Selected seed 195 with value = 0.0890
+Query 1/1: Action query time = 0.484 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1116
+t=138: Selected seed 195 with value = 0.1116
+Query 1/1: Action query time = 0.489 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1167
+t=154: Selected seed 195 with value = 0.1167
+Query 1/1: Action query time = 0.486 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2526
+t=170: Selected seed 195 with value = 0.2526
+Query 1/1: Action query time = 0.477 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1215
+t=186: Selected seed 195 with value = 0.1215
+Query 1/1: Action query time = 0.479 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1263
+t=202: Selected seed 195 with value = 0.1263
+Query 1/1: Action query time = 0.476 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1519
+t=218: Selected seed 195 with value = 0.1519
+Query 1/1: Action query time = 0.475 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1538
+t=234: Selected seed 195 with value = 0.1538
+Query 1/1: Action query time = 0.489 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3436
+t=250: Selected seed 195 with value = 0.3436
+Query 1/1: Action query time = 0.486 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4362
+t=266: Selected seed 195 with value = 0.4362
+Query 1/1: Action query time = 0.481 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4975
+t=282: Selected seed 195 with value = 0.4975
+Query 1/1: Action query time = 0.480 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5691
+t=298: Selected seed 195 with value = 0.5691
+Query 1/1: Action query time = 0.477 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4188
+t=314: Selected seed 195 with value = 0.4188
+Query 1/1: Action query time = 0.478 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4895
+t=330: Selected seed 195 with value = 0.4895
+Query 1/1: Action query time = 0.475 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5048
+t=346: Selected seed 195 with value = 0.5048
+Query 1/1: Action query time = 0.477 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6013
+t=362: Selected seed 195 with value = 0.6013
+Query 1/1: Action query time = 0.473 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3785
+t=378: Selected seed 195 with value = 0.3785
+Query 1/1: Action query time = 0.475 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3120
+t=394: Selected seed 195 with value = 0.3120
+Query 1/1: Action query time = 0.483 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3504
+t=410: Selected seed 195 with value = 0.3504
+Query 1/1: Action query time = 0.486 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3570
+t=426: Selected seed 195 with value = 0.3570
+Query 1/1: Action query time = 0.483 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3879
+t=442: Selected seed 195 with value = 0.3879
+Query 1/1: Action query time = 0.479 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4713
+t=458: Selected seed 195 with value = 0.4713
+Query 1/1: Action query time = 0.482 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5349
+t=474: Selected seed 195 with value = 0.5349
+Query 1/1: Action query time = 0.477 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6134
+t=490: Selected seed 195 with value = 0.6134
+Query 1/1: Action query time = 0.483 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5596
+t=506: Selected seed 195 with value = 0.5596
+Query 1/1: Action query time = 0.480 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2944
+t=522: Selected seed 195 with value = 0.2944
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=3--success=False--task=put_both_the_alphabet_soup_and_the_tomat.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=3--success=False--task=put_both_the_alphabet_soup_and_the_.mp4
+Success: False
+# episodes completed so far: 3
+# successes: 0 (0.0%)
+
+Task: put both the alphabet soup and the tomato sauce in the basket
+Starting episode 4...
+Query 1/1: Action query time = 0.481 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0734
+t=10: Selected seed 195 with value = 0.0734
+Query 1/1: Action query time = 0.474 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0916
+t=26: Selected seed 195 with value = 0.0916
+Query 1/1: Action query time = 0.476 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1540
+t=42: Selected seed 195 with value = 0.1540
+Query 1/1: Action query time = 0.472 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1014
+t=58: Selected seed 195 with value = 0.1014
+Query 1/1: Action query time = 0.474 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0729
+t=74: Selected seed 195 with value = 0.0729
+Query 1/1: Action query time = 0.477 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0535
+t=90: Selected seed 195 with value = 0.0535
+Query 1/1: Action query time = 0.477 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1108
+t=106: Selected seed 195 with value = 0.1108
+Query 1/1: Action query time = 0.475 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1139
+t=122: Selected seed 195 with value = 0.1139
+Query 1/1: Action query time = 0.476 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1303
+t=138: Selected seed 195 with value = 0.1303
+Query 1/1: Action query time = 0.476 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2171
+t=154: Selected seed 195 with value = 0.2171
+Query 1/1: Action query time = 0.476 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3814
+t=170: Selected seed 195 with value = 0.3814
+Query 1/1: Action query time = 0.547 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4519
+t=186: Selected seed 195 with value = 0.4519
+Query 1/1: Action query time = 0.477 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4977
+t=202: Selected seed 195 with value = 0.4977
+Query 1/1: Action query time = 0.478 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5718
+t=218: Selected seed 195 with value = 0.5718
+Query 1/1: Action query time = 0.479 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4481
+t=234: Selected seed 195 with value = 0.4481
+Query 1/1: Action query time = 0.477 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4971
+t=250: Selected seed 195 with value = 0.4971
+Query 1/1: Action query time = 0.480 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5327
+t=266: Selected seed 195 with value = 0.5327
+Query 1/1: Action query time = 0.480 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5918
+t=282: Selected seed 195 with value = 0.5918
+Query 1/1: Action query time = 0.477 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5559
+t=298: Selected seed 195 with value = 0.5559
+Query 1/1: Action query time = 0.474 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4365
+t=314: Selected seed 195 with value = 0.4365
+Query 1/1: Action query time = 0.474 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2318
+t=330: Selected seed 195 with value = 0.2318
+Query 1/1: Action query time = 0.474 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4090
+t=346: Selected seed 195 with value = 0.4090
+Query 1/1: Action query time = 0.476 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4077
+t=362: Selected seed 195 with value = 0.4077
+Query 1/1: Action query time = 0.485 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4913
+t=378: Selected seed 195 with value = 0.4913
+Query 1/1: Action query time = 0.478 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5083
+t=394: Selected seed 195 with value = 0.5083
+Query 1/1: Action query time = 0.482 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5781
+t=410: Selected seed 195 with value = 0.5781
+Query 1/1: Action query time = 0.483 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4436
+t=426: Selected seed 195 with value = 0.4436
+Query 1/1: Action query time = 0.480 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5034
+t=442: Selected seed 195 with value = 0.5034
+Query 1/1: Action query time = 0.488 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5738
+t=458: Selected seed 195 with value = 0.5738
+Query 1/1: Action query time = 0.537 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4449
+t=474: Selected seed 195 with value = 0.4449
+Query 1/1: Action query time = 0.476 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5090
+t=490: Selected seed 195 with value = 0.5090
+Query 1/1: Action query time = 0.480 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5705
+t=506: Selected seed 195 with value = 0.5705
+Query 1/1: Action query time = 0.483 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4307
+t=522: Selected seed 195 with value = 0.4307
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=4--success=False--task=put_both_the_alphabet_soup_and_the_tomat.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=4--success=False--task=put_both_the_alphabet_soup_and_the_.mp4
+Success: False
+# episodes completed so far: 4
+# successes: 0 (0.0%)
+
+Task: put both the alphabet soup and the tomato sauce in the basket
+Starting episode 5...
+Query 1/1: Action query time = 0.484 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1053
+t=10: Selected seed 195 with value = 0.1053
+Query 1/1: Action query time = 0.474 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1122
+t=26: Selected seed 195 with value = 0.1122
+Query 1/1: Action query time = 0.475 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1173
+t=42: Selected seed 195 with value = 0.1173
+Query 1/1: Action query time = 0.476 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1239
+t=58: Selected seed 195 with value = 0.1239
+Query 1/1: Action query time = 0.485 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1192
+t=74: Selected seed 195 with value = 0.1192
+Query 1/1: Action query time = 0.478 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2743
+t=90: Selected seed 195 with value = 0.2743
+Query 1/1: Action query time = 0.483 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1476
+t=106: Selected seed 195 with value = 0.1476
+Query 1/1: Action query time = 0.478 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1372
+t=122: Selected seed 195 with value = 0.1372
+Query 1/1: Action query time = 0.477 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1567
+t=138: Selected seed 195 with value = 0.1567
+Query 1/1: Action query time = 0.477 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5164
+t=154: Selected seed 195 with value = 0.5164
+Query 1/1: Action query time = 0.478 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5667
+t=170: Selected seed 195 with value = 0.5667
+Query 1/1: Action query time = 0.478 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5756
+t=186: Selected seed 195 with value = 0.5756
+Query 1/1: Action query time = 0.478 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3578
+t=202: Selected seed 195 with value = 0.3578
+Query 1/1: Action query time = 0.480 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3647
+t=218: Selected seed 195 with value = 0.3647
+Query 1/1: Action query time = 0.483 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4011
+t=234: Selected seed 195 with value = 0.4011
+Query 1/1: Action query time = 0.482 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4837
+t=250: Selected seed 195 with value = 0.4837
+Query 1/1: Action query time = 0.480 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5064
+t=266: Selected seed 195 with value = 0.5064
+Query 1/1: Action query time = 0.487 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5818
+t=282: Selected seed 195 with value = 0.5818
+Query 1/1: Action query time = 0.491 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4452
+t=298: Selected seed 195 with value = 0.4452
+Query 1/1: Action query time = 0.475 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4790
+t=314: Selected seed 195 with value = 0.4790
+Query 1/1: Action query time = 0.474 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5701
+t=330: Selected seed 195 with value = 0.5701
+Query 1/1: Action query time = 0.475 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4517
+t=346: Selected seed 195 with value = 0.4517
+Query 1/1: Action query time = 0.477 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4825
+t=362: Selected seed 195 with value = 0.4825
+Query 1/1: Action query time = 0.472 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5590
+t=378: Selected seed 195 with value = 0.5590
+Query 1/1: Action query time = 0.474 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4468
+t=394: Selected seed 195 with value = 0.4468
+Query 1/1: Action query time = 0.473 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4817
+t=410: Selected seed 195 with value = 0.4817
+Query 1/1: Action query time = 0.547 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5568
+t=426: Selected seed 195 with value = 0.5568
+Query 1/1: Action query time = 0.483 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4479
+t=442: Selected seed 195 with value = 0.4479
+Query 1/1: Action query time = 0.563 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4758
+t=458: Selected seed 195 with value = 0.4758
+Query 1/1: Action query time = 0.494 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5575
+t=474: Selected seed 195 with value = 0.5575
+Query 1/1: Action query time = 0.477 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4555
+t=490: Selected seed 195 with value = 0.4555
+Query 1/1: Action query time = 0.489 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4700
+t=506: Selected seed 195 with value = 0.4700
+Query 1/1: Action query time = 0.481 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5399
+t=522: Selected seed 195 with value = 0.5399
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=5--success=False--task=put_both_the_alphabet_soup_and_the_tomat.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=5--success=False--task=put_both_the_alphabet_soup_and_the_.mp4
+Success: False
+# episodes completed so far: 5
+# successes: 0 (0.0%)
+Current task success rate: 0.0
+Current total success rate: 0.0
+Using default initial states
+
+Task: put both the cream cheese box and the butter in the basket
+Starting episode 1...
+Query 1/1: Action query time = 0.481 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0893
+t=10: Selected seed 195 with value = 0.0893
+Query 1/1: Action query time = 0.477 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1023
+t=26: Selected seed 195 with value = 0.1023
+Query 1/1: Action query time = 0.471 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1038
+t=42: Selected seed 195 with value = 0.1038
+Query 1/1: Action query time = 0.473 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1103
+t=58: Selected seed 195 with value = 0.1103
+Query 1/1: Action query time = 0.472 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1381
+t=74: Selected seed 195 with value = 0.1381
+Query 1/1: Action query time = 0.472 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1548
+t=90: Selected seed 195 with value = 0.1548
+Query 1/1: Action query time = 0.472 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4194
+t=106: Selected seed 195 with value = 0.4194
+Query 1/1: Action query time = 0.480 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4497
+t=122: Selected seed 195 with value = 0.4497
+Query 1/1: Action query time = 0.474 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3221
+t=138: Selected seed 195 with value = 0.3221
+Query 1/1: Action query time = 0.469 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4039
+t=154: Selected seed 195 with value = 0.4039
+Query 1/1: Action query time = 0.473 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4188
+t=170: Selected seed 195 with value = 0.4188
+Query 1/1: Action query time = 0.471 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4985
+t=186: Selected seed 195 with value = 0.4985
+Query 1/1: Action query time = 0.474 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5747
+t=202: Selected seed 195 with value = 0.5747
+Query 1/1: Action query time = 0.475 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6737
+t=218: Selected seed 195 with value = 0.6737
+Query 1/1: Action query time = 0.479 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7540
+t=234: Selected seed 195 with value = 0.7540
+Query 1/1: Action query time = 0.476 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8989
+t=250: Selected seed 195 with value = 0.8989
+Query 1/1: Action query time = 0.477 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9833
+t=266: Selected seed 195 with value = 0.9833
+Query 1/1: Action query time = 0.474 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6267
+t=282: Selected seed 195 with value = 0.6267
+Query 1/1: Action query time = 0.475 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4862
+t=298: Selected seed 195 with value = 0.4862
+Query 1/1: Action query time = 0.474 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5183
+t=314: Selected seed 195 with value = 0.5183
+Query 1/1: Action query time = 0.477 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5483
+t=330: Selected seed 195 with value = 0.5483
+Query 1/1: Action query time = 0.481 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6192
+t=346: Selected seed 195 with value = 0.6192
+Query 1/1: Action query time = 0.478 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7299
+t=362: Selected seed 195 with value = 0.7299
+Query 1/1: Action query time = 0.545 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8989
+t=378: Selected seed 195 with value = 0.8989
+Query 1/1: Action query time = 0.477 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9642
+t=394: Selected seed 195 with value = 0.9642
+Query 1/1: Action query time = 0.473 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6008
+t=410: Selected seed 195 with value = 0.6008
+Query 1/1: Action query time = 0.493 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4616
+t=426: Selected seed 195 with value = 0.4616
+Query 1/1: Action query time = 0.480 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5029
+t=442: Selected seed 195 with value = 0.5029
+Query 1/1: Action query time = 0.478 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5529
+t=458: Selected seed 195 with value = 0.5529
+Query 1/1: Action query time = 0.474 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6009
+t=474: Selected seed 195 with value = 0.6009
+Query 1/1: Action query time = 0.474 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6555
+t=490: Selected seed 195 with value = 0.6555
+Query 1/1: Action query time = 0.475 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7745
+t=506: Selected seed 195 with value = 0.7745
+Query 1/1: Action query time = 0.486 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9642
+t=522: Selected seed 195 with value = 0.9642
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=6--success=False--task=put_both_the_cream_cheese_box_and_the_bu.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=6--success=False--task=put_both_the_cream_cheese_box_and_t.mp4
+Success: False
+# episodes completed so far: 6
+# successes: 0 (0.0%)
+
+Task: put both the cream cheese box and the butter in the basket
+Starting episode 2...
+Query 1/1: Action query time = 0.508 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1034
+t=10: Selected seed 195 with value = 0.1034
+Query 1/1: Action query time = 0.481 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1128
+t=26: Selected seed 195 with value = 0.1128
+Query 1/1: Action query time = 0.478 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1280
+t=42: Selected seed 195 with value = 0.1280
+Query 1/1: Action query time = 0.474 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1082
+t=58: Selected seed 195 with value = 0.1082
+Query 1/1: Action query time = 0.478 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1409
+t=74: Selected seed 195 with value = 0.1409
+Query 1/1: Action query time = 0.476 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1808
+t=90: Selected seed 195 with value = 0.1808
+Query 1/1: Action query time = 0.478 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1224
+t=106: Selected seed 195 with value = 0.1224
+Query 1/1: Action query time = 0.477 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1308
+t=122: Selected seed 195 with value = 0.1308
+Query 1/1: Action query time = 0.481 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1896
+t=138: Selected seed 195 with value = 0.1896
+Query 1/1: Action query time = 0.478 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1303
+t=154: Selected seed 195 with value = 0.1303
+Query 1/1: Action query time = 0.476 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1791
+t=170: Selected seed 195 with value = 0.1791
+Query 1/1: Action query time = 0.479 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2126
+t=186: Selected seed 195 with value = 0.2126
+Query 1/1: Action query time = 0.477 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4635
+t=202: Selected seed 195 with value = 0.4635
+Query 1/1: Action query time = 0.518 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4293
+t=218: Selected seed 195 with value = 0.4293
+Query 1/1: Action query time = 0.479 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3691
+t=234: Selected seed 195 with value = 0.3691
+Query 1/1: Action query time = 0.476 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3949
+t=250: Selected seed 195 with value = 0.3949
+Query 1/1: Action query time = 0.474 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4226
+t=266: Selected seed 195 with value = 0.4226
+Query 1/1: Action query time = 0.474 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5023
+t=282: Selected seed 195 with value = 0.5023
+Query 1/1: Action query time = 0.472 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6120
+t=298: Selected seed 195 with value = 0.6120
+Query 1/1: Action query time = 0.471 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4882
+t=314: Selected seed 195 with value = 0.4882
+Query 1/1: Action query time = 0.473 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4514
+t=330: Selected seed 195 with value = 0.4514
+Query 1/1: Action query time = 0.473 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5992
+t=346: Selected seed 195 with value = 0.5992
+Query 1/1: Action query time = 0.481 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4589
+t=362: Selected seed 195 with value = 0.4589
+Query 1/1: Action query time = 0.478 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5882
+t=378: Selected seed 195 with value = 0.5882
+Query 1/1: Action query time = 0.475 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4508
+t=394: Selected seed 195 with value = 0.4508
+Query 1/1: Action query time = 0.478 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5157
+t=410: Selected seed 195 with value = 0.5157
+Query 1/1: Action query time = 0.477 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6307
+t=426: Selected seed 195 with value = 0.6307
+Query 1/1: Action query time = 0.479 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7264
+t=442: Selected seed 195 with value = 0.7264
+Query 1/1: Action query time = 0.571 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8295
+t=458: Selected seed 195 with value = 0.8295
+Query 1/1: Action query time = 0.481 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9549
+t=474: Selected seed 195 with value = 0.9549
+Query 1/1: Action query time = 0.481 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5970
+t=490: Selected seed 195 with value = 0.5970
+Query 1/1: Action query time = 0.472 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4728
+t=506: Selected seed 195 with value = 0.4728
+Query 1/1: Action query time = 0.473 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4964
+t=522: Selected seed 195 with value = 0.4964
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=7--success=False--task=put_both_the_cream_cheese_box_and_the_bu.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=7--success=False--task=put_both_the_cream_cheese_box_and_t.mp4
+Success: False
+# episodes completed so far: 7
+# successes: 0 (0.0%)
+
+Task: put both the cream cheese box and the butter in the basket
+Starting episode 3...
+Query 1/1: Action query time = 0.477 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1044
+t=10: Selected seed 195 with value = 0.1044
+Query 1/1: Action query time = 0.498 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1167
+t=26: Selected seed 195 with value = 0.1167
+Query 1/1: Action query time = 0.477 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1354
+t=42: Selected seed 195 with value = 0.1354
+Query 1/1: Action query time = 0.474 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1276
+t=58: Selected seed 195 with value = 0.1276
+Query 1/1: Action query time = 0.476 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1697
+t=74: Selected seed 195 with value = 0.1697
+Query 1/1: Action query time = 0.480 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2121
+t=90: Selected seed 195 with value = 0.2121
+Query 1/1: Action query time = 0.486 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2445
+t=106: Selected seed 195 with value = 0.2445
+Query 1/1: Action query time = 0.474 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1523
+t=122: Selected seed 195 with value = 0.1523
+Query 1/1: Action query time = 0.478 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4515
+t=138: Selected seed 195 with value = 0.4515
+Query 1/1: Action query time = 0.476 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4895
+t=154: Selected seed 195 with value = 0.4895
+Query 1/1: Action query time = 0.473 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3095
+t=170: Selected seed 195 with value = 0.3095
+Query 1/1: Action query time = 0.475 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3524
+t=186: Selected seed 195 with value = 0.3524
+Query 1/1: Action query time = 0.476 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3867
+t=202: Selected seed 195 with value = 0.3867
+Query 1/1: Action query time = 0.475 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4288
+t=218: Selected seed 195 with value = 0.4288
+Query 1/1: Action query time = 0.473 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4922
+t=234: Selected seed 195 with value = 0.4922
+Query 1/1: Action query time = 0.473 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6019
+t=250: Selected seed 195 with value = 0.6019
+Query 1/1: Action query time = 0.493 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5227
+t=266: Selected seed 195 with value = 0.5227
+Query 1/1: Action query time = 0.481 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4700
+t=282: Selected seed 195 with value = 0.4700
+Query 1/1: Action query time = 0.485 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4914
+t=298: Selected seed 195 with value = 0.4914
+Query 1/1: Action query time = 0.521 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4974
+t=314: Selected seed 195 with value = 0.4974
+Query 1/1: Action query time = 0.480 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4984
+t=330: Selected seed 195 with value = 0.4984
+Query 1/1: Action query time = 0.481 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4972
+t=346: Selected seed 195 with value = 0.4972
+Query 1/1: Action query time = 0.478 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5640
+t=362: Selected seed 195 with value = 0.5640
+Query 1/1: Action query time = 0.477 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6716
+t=378: Selected seed 195 with value = 0.6716
+Query 1/1: Action query time = 0.480 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7716
+t=394: Selected seed 195 with value = 0.7716
+Query 1/1: Action query time = 0.492 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9244
+t=410: Selected seed 195 with value = 0.9244
+Query 1/1: Action query time = 0.478 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8457
+t=426: Selected seed 195 with value = 0.8457
+Query 1/1: Action query time = 0.478 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5110
+t=442: Selected seed 195 with value = 0.5110
+Query 1/1: Action query time = 0.478 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4776
+t=458: Selected seed 195 with value = 0.4776
+Query 1/1: Action query time = 0.476 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4929
+t=474: Selected seed 195 with value = 0.4929
+Query 1/1: Action query time = 0.477 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5634
+t=490: Selected seed 195 with value = 0.5634
+Query 1/1: Action query time = 0.477 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6388
+t=506: Selected seed 195 with value = 0.6388
+Query 1/1: Action query time = 0.478 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7381
+t=522: Selected seed 195 with value = 0.7381
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=8--success=False--task=put_both_the_cream_cheese_box_and_the_bu.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=8--success=False--task=put_both_the_cream_cheese_box_and_t.mp4
+Success: False
+# episodes completed so far: 8
+# successes: 0 (0.0%)
+
+Task: put both the cream cheese box and the butter in the basket
+Starting episode 4...
+Query 1/1: Action query time = 0.483 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1021
+t=10: Selected seed 195 with value = 0.1021
+Query 1/1: Action query time = 0.473 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1162
+t=26: Selected seed 195 with value = 0.1162
+Query 1/1: Action query time = 0.479 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1537
+t=42: Selected seed 195 with value = 0.1537
+Query 1/1: Action query time = 0.478 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1690
+t=58: Selected seed 195 with value = 0.1690
+Query 1/1: Action query time = 0.478 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1647
+t=74: Selected seed 195 with value = 0.1647
+Query 1/1: Action query time = 0.481 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2591
+t=90: Selected seed 195 with value = 0.2591
+Query 1/1: Action query time = 0.480 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1551
+t=106: Selected seed 195 with value = 0.1551
+Query 1/1: Action query time = 0.479 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2031
+t=122: Selected seed 195 with value = 0.2031
+Query 1/1: Action query time = 0.477 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1961
+t=138: Selected seed 195 with value = 0.1961
+Query 1/1: Action query time = 0.476 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2434
+t=154: Selected seed 195 with value = 0.2434
+Query 1/1: Action query time = 0.476 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2734
+t=170: Selected seed 195 with value = 0.2734
+Query 1/1: Action query time = 0.477 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3708
+t=186: Selected seed 195 with value = 0.3708
+Query 1/1: Action query time = 0.476 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4073
+t=202: Selected seed 195 with value = 0.4073
+Query 1/1: Action query time = 0.477 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4297
+t=218: Selected seed 195 with value = 0.4297
+Query 1/1: Action query time = 0.476 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4905
+t=234: Selected seed 195 with value = 0.4905
+Query 1/1: Action query time = 0.475 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5961
+t=250: Selected seed 195 with value = 0.5961
+Query 1/1: Action query time = 0.471 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4755
+t=266: Selected seed 195 with value = 0.4755
+Query 1/1: Action query time = 0.480 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4386
+t=282: Selected seed 195 with value = 0.4386
+Query 1/1: Action query time = 0.475 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4875
+t=298: Selected seed 195 with value = 0.4875
+Query 1/1: Action query time = 0.477 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5703
+t=314: Selected seed 195 with value = 0.5703
+Query 1/1: Action query time = 0.479 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6681
+t=330: Selected seed 195 with value = 0.6681
+Query 1/1: Action query time = 0.475 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7599
+t=346: Selected seed 195 with value = 0.7599
+Query 1/1: Action query time = 0.479 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9375
+t=362: Selected seed 195 with value = 0.9375
+Query 1/1: Action query time = 0.474 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9745
+t=378: Selected seed 195 with value = 0.9745
+Query 1/1: Action query time = 0.475 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5519
+t=394: Selected seed 195 with value = 0.5519
+Query 1/1: Action query time = 0.546 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4765
+t=410: Selected seed 195 with value = 0.4765
+Query 1/1: Action query time = 0.476 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4897
+t=426: Selected seed 195 with value = 0.4897
+Query 1/1: Action query time = 0.534 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5897
+t=442: Selected seed 195 with value = 0.5897
+Query 1/1: Action query time = 0.477 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4840
+t=458: Selected seed 195 with value = 0.4840
+Query 1/1: Action query time = 0.476 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6284
+t=474: Selected seed 195 with value = 0.6284
+Query 1/1: Action query time = 0.477 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7883
+t=490: Selected seed 195 with value = 0.7883
+Query 1/1: Action query time = 0.477 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9606
+t=506: Selected seed 195 with value = 0.9606
+Query 1/1: Action query time = 0.475 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9441
+t=522: Selected seed 195 with value = 0.9441
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=9--success=False--task=put_both_the_cream_cheese_box_and_the_bu.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=9--success=False--task=put_both_the_cream_cheese_box_and_t.mp4
+Success: False
+# episodes completed so far: 9
+# successes: 0 (0.0%)
+
+Task: put both the cream cheese box and the butter in the basket
+Starting episode 5...
+Query 1/1: Action query time = 0.485 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1012
+t=10: Selected seed 195 with value = 0.1012
+Query 1/1: Action query time = 0.473 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1191
+t=26: Selected seed 195 with value = 0.1191
+Query 1/1: Action query time = 0.474 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1255
+t=42: Selected seed 195 with value = 0.1255
+Query 1/1: Action query time = 0.474 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1359
+t=58: Selected seed 195 with value = 0.1359
+Query 1/1: Action query time = 0.480 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1530
+t=74: Selected seed 195 with value = 0.1530
+Query 1/1: Action query time = 0.478 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1842
+t=90: Selected seed 195 with value = 0.1842
+Query 1/1: Action query time = 0.478 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1474
+t=106: Selected seed 195 with value = 0.1474
+Query 1/1: Action query time = 0.476 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1736
+t=122: Selected seed 195 with value = 0.1736
+Query 1/1: Action query time = 0.478 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2219
+t=138: Selected seed 195 with value = 0.2219
+Query 1/1: Action query time = 0.476 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3079
+t=154: Selected seed 195 with value = 0.3079
+Query 1/1: Action query time = 0.476 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4748
+t=170: Selected seed 195 with value = 0.4748
+Query 1/1: Action query time = 0.475 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3819
+t=186: Selected seed 195 with value = 0.3819
+Query 1/1: Action query time = 0.478 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4140
+t=202: Selected seed 195 with value = 0.4140
+Query 1/1: Action query time = 0.476 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4290
+t=218: Selected seed 195 with value = 0.4290
+Query 1/1: Action query time = 0.477 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5042
+t=234: Selected seed 195 with value = 0.5042
+Query 1/1: Action query time = 0.480 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6074
+t=250: Selected seed 195 with value = 0.6074
+Query 1/1: Action query time = 0.475 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4462
+t=266: Selected seed 195 with value = 0.4462
+Query 1/1: Action query time = 0.548 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4648
+t=282: Selected seed 195 with value = 0.4648
+Query 1/1: Action query time = 0.479 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5927
+t=298: Selected seed 195 with value = 0.5927
+Query 1/1: Action query time = 0.476 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4849
+t=314: Selected seed 195 with value = 0.4849
+Query 1/1: Action query time = 0.474 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4657
+t=330: Selected seed 195 with value = 0.4657
+Query 1/1: Action query time = 0.477 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4970
+t=346: Selected seed 195 with value = 0.4970
+Query 1/1: Action query time = 0.474 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5895
+t=362: Selected seed 195 with value = 0.5895
+Query 1/1: Action query time = 0.476 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7047
+t=378: Selected seed 195 with value = 0.7047
+Query 1/1: Action query time = 0.484 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.8078
+t=394: Selected seed 195 with value = 0.8078
+Query 1/1: Action query time = 0.479 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9615
+t=410: Selected seed 195 with value = 0.9615
+Query 1/1: Action query time = 0.477 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.9637
+t=426: Selected seed 195 with value = 0.9637
+Query 1/1: Action query time = 0.484 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5169
+t=442: Selected seed 195 with value = 0.5169
+Query 1/1: Action query time = 0.477 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4979
+t=458: Selected seed 195 with value = 0.4979
+Query 1/1: Action query time = 0.474 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.5454
+t=474: Selected seed 195 with value = 0.5454
+Query 1/1: Action query time = 0.481 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6028
+t=490: Selected seed 195 with value = 0.6028
+Query 1/1: Action query time = 0.475 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.6445
+t=506: Selected seed 195 with value = 0.6445
+Query 1/1: Action query time = 0.477 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.7731
+t=522: Selected seed 195 with value = 0.7731
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=10--success=False--task=put_both_the_cream_cheese_box_and_the_bu.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=10--success=False--task=put_both_the_cream_cheese_box_and_t.mp4
+Success: False
+# episodes completed so far: 10
+# successes: 0 (0.0%)
+Current task success rate: 0.0
+Current total success rate: 0.0
+Using default initial states
+
+Task: turn on the stove and put the moka pot on it
+Starting episode 1...
+Query 1/1: Action query time = 0.479 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0871
+t=10: Selected seed 195 with value = 0.0871
+Query 1/1: Action query time = 0.475 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1045
+t=26: Selected seed 195 with value = 0.1045
+Query 1/1: Action query time = 0.472 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1618
+t=42: Selected seed 195 with value = 0.1618
+Query 1/1: Action query time = 0.481 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1533
+t=58: Selected seed 195 with value = 0.1533
+Query 1/1: Action query time = 0.478 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2237
+t=74: Selected seed 195 with value = 0.2237
+Query 1/1: Action query time = 0.478 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1799
+t=90: Selected seed 195 with value = 0.1799
+Query 1/1: Action query time = 0.475 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2281
+t=106: Selected seed 195 with value = 0.2281
+Query 1/1: Action query time = 0.472 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1947
+t=122: Selected seed 195 with value = 0.1947
+Query 1/1: Action query time = 0.471 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2214
+t=138: Selected seed 195 with value = 0.2214
+Query 1/1: Action query time = 0.474 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2199
+t=154: Selected seed 195 with value = 0.2199
+Query 1/1: Action query time = 0.473 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2071
+t=170: Selected seed 195 with value = 0.2071
+Query 1/1: Action query time = 0.473 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2107
+t=186: Selected seed 195 with value = 0.2107
+Query 1/1: Action query time = 0.472 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2139
+t=202: Selected seed 195 with value = 0.2139
+Query 1/1: Action query time = 0.547 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2006
+t=218: Selected seed 195 with value = 0.2006
+Query 1/1: Action query time = 0.476 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2231
+t=234: Selected seed 195 with value = 0.2231
+Query 1/1: Action query time = 0.477 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2122
+t=250: Selected seed 195 with value = 0.2122
+Query 1/1: Action query time = 0.478 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1824
+t=266: Selected seed 195 with value = 0.1824
+Query 1/1: Action query time = 0.475 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2081
+t=282: Selected seed 195 with value = 0.2081
+Query 1/1: Action query time = 0.471 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1961
+t=298: Selected seed 195 with value = 0.1961
+Query 1/1: Action query time = 0.472 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2137
+t=314: Selected seed 195 with value = 0.2137
+Query 1/1: Action query time = 0.472 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2705
+t=330: Selected seed 195 with value = 0.2705
+Query 1/1: Action query time = 0.476 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2056
+t=346: Selected seed 195 with value = 0.2056
+Query 1/1: Action query time = 0.473 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2167
+t=362: Selected seed 195 with value = 0.2167
+Query 1/1: Action query time = 0.472 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2307
+t=378: Selected seed 195 with value = 0.2307
+Query 1/1: Action query time = 0.473 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2032
+t=394: Selected seed 195 with value = 0.2032
+Query 1/1: Action query time = 0.475 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2099
+t=410: Selected seed 195 with value = 0.2099
+Query 1/1: Action query time = 0.479 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2110
+t=426: Selected seed 195 with value = 0.2110
+Query 1/1: Action query time = 0.482 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2089
+t=442: Selected seed 195 with value = 0.2089
+Query 1/1: Action query time = 0.480 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2130
+t=458: Selected seed 195 with value = 0.2130
+Query 1/1: Action query time = 0.474 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1986
+t=474: Selected seed 195 with value = 0.1986
+Query 1/1: Action query time = 0.472 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2030
+t=490: Selected seed 195 with value = 0.2030
+Query 1/1: Action query time = 0.473 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2375
+t=506: Selected seed 195 with value = 0.2375
+Query 1/1: Action query time = 0.476 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1850
+t=522: Selected seed 195 with value = 0.1850
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=11--success=False--task=turn_on_the_stove_and_put_the_moka_pot_o.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=11--success=False--task=turn_on_the_stove_and_put_the_moka_.mp4
+Success: False
+# episodes completed so far: 11
+# successes: 0 (0.0%)
+
+Task: turn on the stove and put the moka pot on it
+Starting episode 2...
+Query 1/1: Action query time = 0.486 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0762
+t=10: Selected seed 195 with value = 0.0762
+Query 1/1: Action query time = 0.475 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0740
+t=26: Selected seed 195 with value = 0.0740
+Query 1/1: Action query time = 0.480 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0863
+t=42: Selected seed 195 with value = 0.0863
+Query 1/1: Action query time = 0.476 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1297
+t=58: Selected seed 195 with value = 0.1297
+Query 1/1: Action query time = 0.478 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1258
+t=74: Selected seed 195 with value = 0.1258
+Query 1/1: Action query time = 0.482 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2238
+t=90: Selected seed 195 with value = 0.2238
+Query 1/1: Action query time = 0.476 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1320
+t=106: Selected seed 195 with value = 0.1320
+Query 1/1: Action query time = 0.476 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2215
+t=122: Selected seed 195 with value = 0.2215
+Query 1/1: Action query time = 0.476 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1390
+t=138: Selected seed 195 with value = 0.1390
+Query 1/1: Action query time = 0.473 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2206
+t=154: Selected seed 195 with value = 0.2206
+Query 1/1: Action query time = 0.549 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1362
+t=170: Selected seed 195 with value = 0.1362
+Query 1/1: Action query time = 0.482 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2223
+t=186: Selected seed 195 with value = 0.2223
+Query 1/1: Action query time = 0.483 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1389
+t=202: Selected seed 195 with value = 0.1389
+Query 1/1: Action query time = 0.481 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2266
+t=218: Selected seed 195 with value = 0.2266
+Query 1/1: Action query time = 0.479 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1230
+t=234: Selected seed 195 with value = 0.1230
+Query 1/1: Action query time = 0.478 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1267
+t=250: Selected seed 195 with value = 0.1267
+Query 1/1: Action query time = 0.483 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2054
+t=266: Selected seed 195 with value = 0.2054
+Query 1/1: Action query time = 0.478 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1351
+t=282: Selected seed 195 with value = 0.1351
+Query 1/1: Action query time = 0.481 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2045
+t=298: Selected seed 195 with value = 0.2045
+Query 1/1: Action query time = 0.478 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1348
+t=314: Selected seed 195 with value = 0.1348
+Query 1/1: Action query time = 0.479 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2029
+t=330: Selected seed 195 with value = 0.2029
+Query 1/1: Action query time = 0.477 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1344
+t=346: Selected seed 195 with value = 0.1344
+Query 1/1: Action query time = 0.478 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2063
+t=362: Selected seed 195 with value = 0.2063
+Query 1/1: Action query time = 0.484 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1378
+t=378: Selected seed 195 with value = 0.1378
+Query 1/1: Action query time = 0.483 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2069
+t=394: Selected seed 195 with value = 0.2069
+Query 1/1: Action query time = 0.477 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1361
+t=410: Selected seed 195 with value = 0.1361
+Query 1/1: Action query time = 0.488 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2080
+t=426: Selected seed 195 with value = 0.2080
+Query 1/1: Action query time = 0.476 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1349
+t=442: Selected seed 195 with value = 0.1349
+Query 1/1: Action query time = 0.479 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2086
+t=458: Selected seed 195 with value = 0.2086
+Query 1/1: Action query time = 0.477 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1340
+t=474: Selected seed 195 with value = 0.1340
+Query 1/1: Action query time = 0.474 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2093
+t=490: Selected seed 195 with value = 0.2093
+Query 1/1: Action query time = 0.475 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1336
+t=506: Selected seed 195 with value = 0.1336
+Query 1/1: Action query time = 0.475 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2109
+t=522: Selected seed 195 with value = 0.2109
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=12--success=False--task=turn_on_the_stove_and_put_the_moka_pot_o.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=12--success=False--task=turn_on_the_stove_and_put_the_moka_.mp4
+Success: False
+# episodes completed so far: 12
+# successes: 0 (0.0%)
+
+Task: turn on the stove and put the moka pot on it
+Starting episode 3...
+Query 1/1: Action query time = 0.483 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0868
+t=10: Selected seed 195 with value = 0.0868
+Query 1/1: Action query time = 0.473 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0903
+t=26: Selected seed 195 with value = 0.0903
+Query 1/1: Action query time = 0.475 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1023
+t=42: Selected seed 195 with value = 0.1023
+Query 1/1: Action query time = 0.473 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1339
+t=58: Selected seed 195 with value = 0.1339
+Query 1/1: Action query time = 0.476 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1469
+t=74: Selected seed 195 with value = 0.1469
+Query 1/1: Action query time = 0.478 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1734
+t=90: Selected seed 195 with value = 0.1734
+Query 1/1: Action query time = 0.478 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2186
+t=106: Selected seed 195 with value = 0.2186
+Query 1/1: Action query time = 0.477 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1531
+t=122: Selected seed 195 with value = 0.1531
+Query 1/1: Action query time = 0.476 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3761
+t=138: Selected seed 195 with value = 0.3761
+Query 1/1: Action query time = 0.476 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1637
+t=154: Selected seed 195 with value = 0.1637
+Query 1/1: Action query time = 0.473 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4050
+t=170: Selected seed 195 with value = 0.4050
+Query 1/1: Action query time = 0.472 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1683
+t=186: Selected seed 195 with value = 0.1683
+Query 1/1: Action query time = 0.473 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3944
+t=202: Selected seed 195 with value = 0.3944
+Query 1/1: Action query time = 0.476 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1537
+t=218: Selected seed 195 with value = 0.1537
+Query 1/1: Action query time = 0.476 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1593
+t=234: Selected seed 195 with value = 0.1593
+Query 1/1: Action query time = 0.487 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2388
+t=250: Selected seed 195 with value = 0.2388
+Query 1/1: Action query time = 0.473 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3307
+t=266: Selected seed 195 with value = 0.3307
+Query 1/1: Action query time = 0.475 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1761
+t=282: Selected seed 195 with value = 0.1761
+Query 1/1: Action query time = 0.473 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3943
+t=298: Selected seed 195 with value = 0.3943
+Query 1/1: Action query time = 0.472 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1730
+t=314: Selected seed 195 with value = 0.1730
+Query 1/1: Action query time = 0.472 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4614
+t=330: Selected seed 195 with value = 0.4614
+Query 1/1: Action query time = 0.473 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1728
+t=346: Selected seed 195 with value = 0.1728
+Query 1/1: Action query time = 0.473 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4701
+t=362: Selected seed 195 with value = 0.4701
+Query 1/1: Action query time = 0.472 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1730
+t=378: Selected seed 195 with value = 0.1730
+Query 1/1: Action query time = 0.472 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4762
+t=394: Selected seed 195 with value = 0.4762
+Query 1/1: Action query time = 0.472 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1719
+t=410: Selected seed 195 with value = 0.1719
+Query 1/1: Action query time = 0.471 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4740
+t=426: Selected seed 195 with value = 0.4740
+Query 1/1: Action query time = 0.471 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1679
+t=442: Selected seed 195 with value = 0.1679
+Query 1/1: Action query time = 0.475 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1834
+t=458: Selected seed 195 with value = 0.1834
+Query 1/1: Action query time = 0.475 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4261
+t=474: Selected seed 195 with value = 0.4261
+Query 1/1: Action query time = 0.471 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1758
+t=490: Selected seed 195 with value = 0.1758
+Query 1/1: Action query time = 0.542 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4747
+t=506: Selected seed 195 with value = 0.4747
+Query 1/1: Action query time = 0.476 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1701
+t=522: Selected seed 195 with value = 0.1701
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=13--success=False--task=turn_on_the_stove_and_put_the_moka_pot_o.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=13--success=False--task=turn_on_the_stove_and_put_the_moka_.mp4
+Success: False
+# episodes completed so far: 13
+# successes: 0 (0.0%)
+
+Task: turn on the stove and put the moka pot on it
+Starting episode 4...
+Query 1/1: Action query time = 0.485 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0804
+t=10: Selected seed 195 with value = 0.0804
+Query 1/1: Action query time = 0.475 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0816
+t=26: Selected seed 195 with value = 0.0816
+Query 1/1: Action query time = 0.478 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0936
+t=42: Selected seed 195 with value = 0.0936
+Query 1/1: Action query time = 0.476 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1234
+t=58: Selected seed 195 with value = 0.1234
+Query 1/1: Action query time = 0.475 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1359
+t=74: Selected seed 195 with value = 0.1359
+Query 1/1: Action query time = 0.475 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2052
+t=90: Selected seed 195 with value = 0.2052
+Query 1/1: Action query time = 0.475 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2099
+t=106: Selected seed 195 with value = 0.2099
+Query 1/1: Action query time = 0.475 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2499
+t=122: Selected seed 195 with value = 0.2499
+Query 1/1: Action query time = 0.478 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1474
+t=138: Selected seed 195 with value = 0.1474
+Query 1/1: Action query time = 0.475 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2570
+t=154: Selected seed 195 with value = 0.2570
+Query 1/1: Action query time = 0.478 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1576
+t=170: Selected seed 195 with value = 0.1576
+Query 1/1: Action query time = 0.478 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2451
+t=186: Selected seed 195 with value = 0.2451
+Query 1/1: Action query time = 0.476 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1615
+t=202: Selected seed 195 with value = 0.1615
+Query 1/1: Action query time = 0.476 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2029
+t=218: Selected seed 195 with value = 0.2029
+Query 1/1: Action query time = 0.479 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2973
+t=234: Selected seed 195 with value = 0.2973
+Query 1/1: Action query time = 0.477 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1580
+t=250: Selected seed 195 with value = 0.1580
+Query 1/1: Action query time = 0.480 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1676
+t=266: Selected seed 195 with value = 0.1676
+Query 1/1: Action query time = 0.480 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2320
+t=282: Selected seed 195 with value = 0.2320
+Query 1/1: Action query time = 0.479 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1650
+t=298: Selected seed 195 with value = 0.1650
+Query 1/1: Action query time = 0.477 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2473
+t=314: Selected seed 195 with value = 0.2473
+Query 1/1: Action query time = 0.480 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1711
+t=330: Selected seed 195 with value = 0.1711
+Query 1/1: Action query time = 0.480 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1823
+t=346: Selected seed 195 with value = 0.1823
+Query 1/1: Action query time = 0.476 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2275
+t=362: Selected seed 195 with value = 0.2275
+Query 1/1: Action query time = 0.474 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1726
+t=378: Selected seed 195 with value = 0.1726
+Query 1/1: Action query time = 0.475 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2396
+t=394: Selected seed 195 with value = 0.2396
+Query 1/1: Action query time = 0.477 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1752
+t=410: Selected seed 195 with value = 0.1752
+Query 1/1: Action query time = 0.473 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1887
+t=426: Selected seed 195 with value = 0.1887
+Query 1/1: Action query time = 0.475 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2222
+t=442: Selected seed 195 with value = 0.2222
+Query 1/1: Action query time = 0.476 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1765
+t=458: Selected seed 195 with value = 0.1765
+Query 1/1: Action query time = 0.480 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2298
+t=474: Selected seed 195 with value = 0.2298
+Query 1/1: Action query time = 0.480 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1747
+t=490: Selected seed 195 with value = 0.1747
+Query 1/1: Action query time = 0.479 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1980
+t=506: Selected seed 195 with value = 0.1980
+Query 1/1: Action query time = 0.474 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2908
+t=522: Selected seed 195 with value = 0.2908
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=14--success=False--task=turn_on_the_stove_and_put_the_moka_pot_o.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=14--success=False--task=turn_on_the_stove_and_put_the_moka_.mp4
+Success: False
+# episodes completed so far: 14
+# successes: 0 (0.0%)
+
+Task: turn on the stove and put the moka pot on it
+Starting episode 5...
+Query 1/1: Action query time = 0.482 sec
+t=10: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0634
+t=10: Selected seed 195 with value = 0.0634
+Query 1/1: Action query time = 0.471 sec
+t=26: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.0790
+t=26: Selected seed 195 with value = 0.0790
+Query 1/1: Action query time = 0.474 sec
+t=42: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1288
+t=42: Selected seed 195 with value = 0.1288
+Query 1/1: Action query time = 0.473 sec
+t=58: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1251
+t=58: Selected seed 195 with value = 0.1251
+Query 1/1: Action query time = 0.476 sec
+t=74: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1989
+t=74: Selected seed 195 with value = 0.1989
+Query 1/1: Action query time = 0.482 sec
+t=90: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1953
+t=90: Selected seed 195 with value = 0.1953
+Query 1/1: Action query time = 0.487 sec
+t=106: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2154
+t=106: Selected seed 195 with value = 0.2154
+Query 1/1: Action query time = 0.480 sec
+t=122: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2293
+t=122: Selected seed 195 with value = 0.2293
+Query 1/1: Action query time = 0.482 sec
+t=138: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2889
+t=138: Selected seed 195 with value = 0.2889
+Query 1/1: Action query time = 0.480 sec
+t=154: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2945
+t=154: Selected seed 195 with value = 0.2945
+Query 1/1: Action query time = 0.480 sec
+t=170: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2944
+t=170: Selected seed 195 with value = 0.2944
+Query 1/1: Action query time = 0.479 sec
+t=186: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1748
+t=186: Selected seed 195 with value = 0.1748
+Query 1/1: Action query time = 0.475 sec
+t=202: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2566
+t=202: Selected seed 195 with value = 0.2566
+Query 1/1: Action query time = 0.476 sec
+t=218: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1763
+t=218: Selected seed 195 with value = 0.1763
+Query 1/1: Action query time = 0.475 sec
+t=234: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.2370
+t=234: Selected seed 195 with value = 0.2370
+Query 1/1: Action query time = 0.476 sec
+t=250: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1513
+t=250: Selected seed 195 with value = 0.1513
+Query 1/1: Action query time = 0.476 sec
+t=266: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.1869
+t=266: Selected seed 195 with value = 0.1869
+Query 1/1: Action query time = 0.476 sec
+t=282: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3419
+t=282: Selected seed 195 with value = 0.3419
+Query 1/1: Action query time = 0.481 sec
+t=298: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3719
+t=298: Selected seed 195 with value = 0.3719
+Query 1/1: Action query time = 0.476 sec
+t=314: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3924
+t=314: Selected seed 195 with value = 0.3924
+Query 1/1: Action query time = 0.479 sec
+t=330: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4009
+t=330: Selected seed 195 with value = 0.4009
+Query 1/1: Action query time = 0.482 sec
+t=346: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.4011
+t=346: Selected seed 195 with value = 0.4011
+Query 1/1: Action query time = 0.480 sec
+t=362: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3910
+t=362: Selected seed 195 with value = 0.3910
+Query 1/1: Action query time = 0.477 sec
+t=378: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3859
+t=378: Selected seed 195 with value = 0.3859
+Query 1/1: Action query time = 0.477 sec
+t=394: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3838
+t=394: Selected seed 195 with value = 0.3838
+Query 1/1: Action query time = 0.478 sec
+t=410: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3804
+t=410: Selected seed 195 with value = 0.3804
+Query 1/1: Action query time = 0.476 sec
+t=426: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3777
+t=426: Selected seed 195 with value = 0.3777
+Query 1/1: Action query time = 0.476 sec
+t=442: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3752
+t=442: Selected seed 195 with value = 0.3752
+Query 1/1: Action query time = 0.477 sec
+t=458: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3721
+t=458: Selected seed 195 with value = 0.3721
+Query 1/1: Action query time = 0.477 sec
+t=474: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3729
+t=474: Selected seed 195 with value = 0.3729
+Query 1/1: Action query time = 0.474 sec
+t=490: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3708
+t=490: Selected seed 195 with value = 0.3708
+Query 1/1: Action query time = 0.475 sec
+t=506: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3660
+t=506: Selected seed 195 with value = 0.3660
+Query 1/1: Action query time = 0.481 sec
+t=522: Current base seed: 195
+Query 1/1 (seed 195): Predicted value = 0.3634
+t=522: Selected seed 195 with value = 0.3634
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--episode=15--success=False--task=turn_on_the_stove_and_put_the_moka_pot_o.mp4
+Saved rollout MP4 at path ./rollouts/2026_06_10/2026_06_10-21_13_15--with_future_img--episode=15--success=False--task=turn_on_the_stove_and_put_the_moka_.mp4
+Success: False
+# episodes completed so far: 15
+# successes: 0 (0.0%)
+Current task success rate: 0.0
+Current total success rate: 0.0
+Final results:
+Total episodes: 15
+Total successes: 0
+Overall success rate: 0.0000 (0.0%)
+Shard results written to outputs/phase1/e1_dominance_audit/expanded_3task_5ep/libero_10/wrist_gray/results.json
