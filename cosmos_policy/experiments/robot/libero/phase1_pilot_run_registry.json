@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-06-12",
+  "scope": "Phase-1 recipe-discrimination pilot for the libero_10 low-ceiling + oscillation problem (see AGENT/libero10_investigation_2026-06-12.md). Two arms, started fresh from the official LIBERO checkpoint, vary ONLY the training data mixture. This file documents the runs; it is not an execution request.",
+  "common": {
+    "platform": "Cosmos Policy Predict2-2B",
+    "protocol": "P2 scene-only, wrist excluded",
+    "base_checkpoint": "hf://nvidia/Cosmos-Policy-LIBERO-Predict2-2B/Cosmos-Policy-LIBERO-Predict2-2B.pt",
+    "experiment": "cosmos_predict2_2b_480p_libero_scene_only",
+    "launcher": "cosmos_policy/experiments/robot/libero/run_scene_only_pilot_train.sh",
+    "num_gpus": 6,
+    "fsdp_shard_size": 6,
+    "batch_size_per_gpu": 30,
+    "grad_accum_iter": 1,
+    "effective_batch": 180,
+    "lr": 1e-4,
+    "scheduler": "unchanged from scene_only base (cycle_lengths=[30000,...])",
+    "max_iter": 15000,
+    "save_iter": 3000,
+    "samples_presented": 2700000,
+    "wandb_mode": "online",
+    "train_gpu_model": "6x RTX PRO 6000 Blackwell 96GB",
+    "iter_speed_s": 3.8,
+    "note": "lr / batch / scheduler are IDENTICAL to the 30K baseline run phase1_scene_only_formal_6gpu_b30_from_libero_ckpt. Only the data mixture (per arm), max_iter, and save_iter differ.",
+    "dataset_raw_counts": {
+      "demo_steps": 275313,
+      "rollout_success_steps": 275313,
+      "rollout_failure_steps": 62506,
+      "success_episodes": 1700,
+      "failure_episodes": 300
+    },
+    "current_recipe_reference": {
+      "job_name": "phase1_scene_only_formal_6gpu_b30_from_libero_ckpt",
+      "mixture": "demo 0.50 / success_rollout 0.25 / failure_rollout 0.25 (failures upsampled 4.4x from 62506 to 275313 steps to hit the 0.5 success-rollout balance)",
+      "30K_eval": {"libero_spatial": 83.2, "libero_goal": 86.6, "libero_object": 70.6, "libero_10": 12.2, "grand_total": 63.1},
+      "libero_10_scan_12K_27K": {"12000": 6, "15000": 39, "18000": 44, "21000": 22, "24000": 50, "27000": 36, "last3_mean_std": "36.0±14.0"}
+    }
+  },
+  "runs": [
+    {
+      "run_id": "armA_demo_only",
+      "job_name": "phase1_pilot_demo_only_6gpu_b30_15k",
+      "status": "RUNNING (launched 2026-06-12 ~17:36)",
+      "hypothesis_variable": "removes failure data AND raises action-supervision density (demo share 0.5->1.0) simultaneously",
+      "overrides": [
+        "dataloader_train.dataset.rollout_data_dir=\"\"",
+        "dataloader_train.dataset.demonstration_sampling_prob=1.0"
+      ],
+      "epoch_layout": {"demo": 275313, "success_rollout": 0, "failure_rollout": 0, "epoch_length": 275313, "shares": "demo 1.00"},
+      "loss_confirmation": "loss dict shows only demo_sample_* terms (no world_model_sample_* / value_function_sample_*) -> zero rollout samples confirmed at runtime",
+      "value_head": "trained on demo value frames only (success returns); harmless for control (value never used in benchmark), mildly weakens value as an E5/SCVC-invariant block",
+      "wandb": "phase1_pilot_demo_only_6gpu_b30_15k",
+      "train_log": "outputs/phase1/pilot_logs/armA_demo_only_train.log"
+    },
+    {
+      "run_id": "armB_success_only_mixture",
+      "job_name": "phase1_pilot_success_only_mix_6gpu_b30_15k",
+      "status": "PENDING manual launch after Arm A completes (shares all 6 GPUs)",
+      "hypothesis_variable": "removes failure data ONLY (keeps 50/25/25 structure and value learning) -> clean attribution vs Arm A",
+      "overrides": [
+        "dataloader_train.dataset.success_rollout_sampling_prob=1.0"
+      ],
+      "epoch_layout": {"demo": 275313, "success_rollout": 275313, "failure_rollout": 0, "epoch_length": 550626, "shares": "demo 0.50 / succ_roll 0.50 / fail_roll 0.00"},
+      "value_head": "preserved (success rollouts feed WM/value heads) -> keeps E5 planning alive",
+      "launch_command": "cd cosmos-policy && nohup bash cosmos_policy/experiments/robot/libero/run_scene_only_pilot_train.sh success_only > outputs/phase1/pilot_logs/armB_success_only_train.log 2>&1 &",
+      "wandb": "phase1_pilot_success_only_mix_6gpu_b30_15k",
+      "train_log": "outputs/phase1/pilot_logs/armB_success_only_train.log"
+    }
+  ],
+  "eval": {
+    "scanner": "cosmos_policy/experiments/robot/libero/eval_checkpoint_scan.sh",
+    "aggregator": "cosmos_policy/experiments/robot/libero/aggregate_checkpoint_scan.py",
+    "comparison": "cosmos_policy/experiments/robot/libero/build_pilot_comparison.py",
+    "iters": [6000, 9000, 12000, 15000],
+    "suite": "libero_10",
+    "trials_per_task": 10,
+    "judgement_rule": "compare arms by MULTI-POINT mean±std only; never single checkpoints (50-trial endpoints were already burned by sampling oscillation troughs). Recipe decision is researcher-only.",
+    "out_root": "outputs/phase1/pilot_eval/"
+  },
+  "decision_logic": {
+    "leakage_confirmed_if": "Arm A and Arm B mean±std both clearly above current-recipe overlap mean -> drop failures project-wide (incl. SCVC pair dataset success_rollout_sampling_prob)",
+    "density_matters_if": "Arm A > Arm B -> demo-only (action-supervision density) helps beyond removing failures",
+    "budget_or_ood_if": "A ≈ B ≈ current -> ceiling is sample-budget / BC-OOD, not leakage -> keep official recipe, invest in variance governance (see VARIANCE_GOVERNANCE_SWITCHES.md) + more steps",
+    "variance_value": "a recipe that halves the std is valuable even at equal mean (oscillation is half the pain)"
+  }
+}
