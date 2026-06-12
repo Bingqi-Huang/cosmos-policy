@@ -43,7 +43,7 @@ if [[ "${RUN_GPU:-0}" != "1" ]]; then
     "bs10 K_s=2 memory smoke",
     "100-pair overfit",
     "A1 derangement quick run",
-    "A2 full-frame quick shrinkage check"
+    "A2 invariant_plus_fscene quick shrinkage check"
   ]
 }
 JSON

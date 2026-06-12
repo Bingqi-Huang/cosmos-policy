@@ -26,7 +26,12 @@ class SCVCPolicyVideo2WorldConfig(CosmosPolicyVideo2WorldConfig):
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
-        valid_frame_sets = {"action", "action+value", "action+value+fproprio", "full"}
+        valid_frame_sets = {"action", "action+value", "action+value+fproprio", "invariant_plus_fscene"}
+        if self.cv_frame_set == "full":
+            raise ValueError(
+                "cv_frame_set 'full' was renamed to 'invariant_plus_fscene' (= invariant block ∪ {future-scene}; "
+                "the A2 wrong-coordinates control). Blank and conditioning frames are never part of any CV set."
+            )
         if self.cv_frame_set not in valid_frame_sets:
             raise ValueError(f"cv_frame_set must be one of {sorted(valid_frame_sets)}, got {self.cv_frame_set!r}")
         if self.cv_pair_mode not in {"matched", "derangement"}:
@@ -41,6 +46,26 @@ class SCVCPolicyVideo2WorldModel(CosmosPolicyVideo2WorldModel):
     def __init__(self, config: SCVCPolicyVideo2WorldConfig):
         super().__init__(config)
         self.config: SCVCPolicyVideo2WorldConfig = config
+        # Prop.-2 / λ-bookkeeping precondition (paper_outline LOCKED DECISION 9, execution_plan §0.1):
+        # every target frame — in particular the covariant future-scene frame — must keep its per-view
+        # FM anchor with uniform per-frame weight, otherwise nominal lambda_cv is no longer the
+        # Lemma-1/Prop.-2 λ and the A2 shrinkage law is mis-measured. Refuse such configs outright.
+        offending = [
+            flag
+            for flag in (
+                "mask_loss_for_action_future_state_prediction",
+                "mask_value_prediction_loss_for_policy_prediction",
+                "mask_current_state_action_for_value_prediction",
+                "mask_future_state_for_qvalue_prediction",
+            )
+            if getattr(config, flag, False)
+        ]
+        if offending:
+            raise ValueError(f"SCVC requires all loss/input mask flags off, but these are set: {offending}")
+        if int(getattr(config, "action_loss_multiplier", 1)) != 1:
+            raise ValueError("SCVC requires action_loss_multiplier=1 (λ bookkeeping; execution_plan §0.1)")
+        # One-time branch-contract check on the first training step (all-but-nuisance matching).
+        self._scvc_contract_checked = False
 
     def _lambda_cv_for_iteration(self, iteration: int) -> float:
         progress = float(iteration) / float(self.config.cv_total_steps)
@@ -130,13 +155,17 @@ class SCVCPolicyVideo2WorldModel(CosmosPolicyVideo2WorldModel):
         )
 
     def _cv_frame_indices(self, data_batch: dict) -> list[torch.Tensor]:
+        # NB: indices are always taken from the batch's `*_latent_idx` fields, never hardcoded —
+        # under P2 (wrist excluded, 7-frame layout) current/future scene are 2/5, not the released
+        # 9-frame layout's 3/7. 'invariant_plus_fscene' (A2) = invariant block ∪ {future-scene};
+        # blank and conditioning frames are never part of any CV set.
         frame_set = self.config.cv_frame_set
         indices = [data_batch["action_latent_idx"]]
-        if frame_set in {"action+value", "action+value+fproprio", "full"}:
+        if frame_set in {"action+value", "action+value+fproprio", "invariant_plus_fscene"}:
             indices.append(data_batch["value_latent_idx"])
-        if frame_set in {"action+value+fproprio", "full"}:
+        if frame_set in {"action+value+fproprio", "invariant_plus_fscene"}:
             indices.append(data_batch["future_proprio_latent_idx"])
-        if frame_set == "full":
+        if frame_set == "invariant_plus_fscene":
             indices.append(data_batch["future_image_latent_idx"])
         return indices
 
@@ -213,6 +242,75 @@ class SCVCPolicyVideo2WorldModel(CosmosPolicyVideo2WorldModel):
         denominator = torch.linalg.vector_norm(target_diff[good].float()).clamp_min(1e-12)
         return numerator / denominator
 
+    _LATENT_IDX_FIELDS = (
+        "action_latent_idx",
+        "current_proprio_latent_idx",
+        "current_image_latent_idx",
+        "future_proprio_latent_idx",
+        "future_image_latent_idx",
+        "value_latent_idx",
+        "current_wrist_image_latent_idx",
+        "future_wrist_image_latent_idx",
+    )
+
+    def _first_step_contract_check(
+        self,
+        data_batch: dict,
+        paired_batch: dict,
+        sigma: torch.Tensor,
+        sigmap: torch.Tensor,
+        epsilon: torch.Tensor,
+        epsilonp: torch.Tensor,
+        out0: dict,
+        outp: dict,
+    ) -> bool:
+        """One-time all-but-nuisance contract check (sanity-ladder rung a, in-trainer half).
+
+        Verifies on the first usable batch that the two comparison arms are matched in everything
+        except the nuisance: identical latent shape and layout, identical (σ, n) when shared, and
+        bitwise-shared invariant targets. Returns True once the check has actually run (so the
+        caller can latch the flag); raises on any violation.
+        """
+        target0, targetp = out0["x0"], outp["x0"]
+        if target0.shape != targetp.shape:
+            raise AssertionError(f"SCVC branch latent shapes differ: {tuple(target0.shape)} vs {tuple(targetp.shape)}")
+        for field in self._LATENT_IDX_FIELDS:
+            if field in data_batch and field in paired_batch:
+                if not torch.equal(data_batch[field].cpu(), paired_batch[field].cpu()):
+                    raise AssertionError(f"SCVC branch latent layout differs on {field}")
+        if self.config.cv_noise_shared:
+            if not (torch.equal(sigma, sigmap) and torch.equal(epsilon, epsilonp)):
+                raise AssertionError("cv_noise_shared=True but (σ, n) differ across branches after split")
+        if self.config.cv_pair_mode != "matched":
+            return True
+        # Invariant targets must be identical across views for valid matched demo pairs: the
+        # injected action/proprio/value frames come from one shared label source, so any difference
+        # here means the pair data or injection path is broken (the non-vacuous runtime form of
+        # "assert value_0 == value_p"). Scene frames (current/future image) are the only frames
+        # allowed to differ.
+        valid = (
+            self._pair_valid_mask(data_batch, target0.device, target0.dtype)
+            * self._pair_valid_mask(paired_batch, target0.device, target0.dtype)
+        ) > 0
+        if not torch.any(valid):
+            return False  # no valid pair in this batch; retry on a later step
+        batch_indices = torch.arange(target0.shape[0], device=target0.device)
+        for field in ("action_latent_idx", "current_proprio_latent_idx", "future_proprio_latent_idx", "value_latent_idx"):
+            idx = data_batch[field].to(target0.device).long()
+            good = valid & (idx != -1)
+            if not torch.any(good):
+                continue
+            safe_idx = idx.clamp_min(0)
+            diff0 = target0[batch_indices, :, safe_idx, :, :][good]
+            diffp = targetp[batch_indices, :, safe_idx, :, :][good]
+            if not torch.allclose(diff0.float(), diffp.float(), rtol=0.0, atol=1e-5):
+                max_err = (diff0.float() - diffp.float()).abs().max().item()
+                raise AssertionError(
+                    f"SCVC invariant target frame {field} differs across branches (max |Δ|={max_err:.3e}); "
+                    "pair labels or latent injection are broken"
+                )
+        return True
+
     def training_step(self, data_batch: dict, iteration: int):
         if "video_pair" not in data_batch:
             raise KeyError("SCVC training requires data_batch['video_pair']; use LIBEROPairDataset.")
@@ -259,6 +357,11 @@ class SCVCPolicyVideo2WorldModel(CosmosPolicyVideo2WorldModel):
             out0, loss0, _, _ = self._branch_loss(x0, condition, epsilon, sigma, data_batch)
             outp, lossp, _, _ = self._branch_loss(x0p, conditionp, epsilonp, sigmap, paired_batch)
 
+            if not self._scvc_contract_checked:
+                self._scvc_contract_checked = self._first_step_contract_check(
+                    data_batch, paired_batch, sigma, sigmap, epsilon, epsilonp, out0, outp
+                )
+
             fm_unscaled = 0.5 * (self._reduce_like_base(loss0) + self._reduce_like_base(lossp))
             cv_unscaled = self._cv_loss_unscaled(
                 out0["model_pred"].x0, outp["model_pred"].x0, out0["weights_per_sigma"], data_batch, paired_batch
@@ -279,7 +382,9 @@ class SCVCPolicyVideo2WorldModel(CosmosPolicyVideo2WorldModel):
                 "scvc_fm_loss_unscaled": total_fm.detach(),
                 "scvc_cv_loss_unscaled": total_cv.detach(),
                 "scvc_lambda_cv": torch.tensor(lambda_cv, device=loss.device),
-                "scvc_cv_frame_set_full": torch.tensor(1 if self.config.cv_frame_set == "full" else 0, device=loss.device),
+                "scvc_cv_includes_fscene": torch.tensor(
+                    1 if self.config.cv_frame_set == "invariant_plus_fscene" else 0, device=loss.device
+                ),
                 "scvc_covariant_future_image_ratio": self._covariant_ratio(
                     last_out0, last_outp, data_batch, paired_batch
                 ).detach(),

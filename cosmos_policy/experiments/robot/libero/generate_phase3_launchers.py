@@ -41,6 +41,11 @@ def script_for_run(run: dict[str, Any], common: dict[str, Any]) -> str:
         "WANDB_MODE": run.get("wandb_mode", common["wandb_mode"]),
     }
     env.update(run.get("extra_env", {}))
+    # The seed must reach train.py or seed-42/seed-43 rows collapse into identical runs:
+    # trainer.seed defaults to 0 and the experiment config hardcodes sampler seed=0, so the
+    # registry seed is wired through the launcher's trailing "$@" as config overrides.
+    seed = int(run["seed"])
+    overrides = [f"trainer.seed={seed}", f"dataloader_train.sampler.seed={seed}"]
     lines = [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
@@ -51,10 +56,11 @@ def script_for_run(run: dict[str, Any], common: dict[str, Any]) -> str:
     ]
     for key, value in env.items():
         lines.append(f"export {key}={shlex.quote(shell_value(value))}")
+    override_str = " ".join(shlex.quote(item) for item in overrides)
     lines.extend(
         [
             "",
-            f"bash {shlex.quote(launcher)} \"$@\"",
+            f"bash {shlex.quote(launcher)} {override_str} \"$@\"",
             "",
         ]
     )

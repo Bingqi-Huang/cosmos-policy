@@ -60,7 +60,7 @@ def summarize(rows: list[dict[str, Any]], repo_root: pathlib.Path, check_images:
         "num_rows": len(rows),
         "by_split": counter_dict(Counter(row.get("split", "<missing>") for row in rows)),
         "by_suite": counter_dict(Counter(row.get("suite", "<missing>") for row in rows)),
-        "by_task": counter_dict(Counter(row.get("task", "<missing>") for row in rows)),
+        "by_task": counter_dict(Counter(row.get("task_name", "<missing>") for row in rows)),
         "by_camera_category": counter_dict(Counter(row.get("camera_category", "<missing>") for row in rows)),
         "by_pair_type": counter_dict(Counter(row.get("pair_type", "<missing>") for row in rows)),
         "future_delta": {

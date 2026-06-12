@@ -29,6 +29,13 @@ local changes are intentional and should be reviewed before any upstream rebase.
 - `cosmos_policy/config/experiment/cosmos_policy_experiment_configs.py`
   - Adds scene-only P2 config and SCVC scene-only paired-data config.
   - Pair dataset node wires `rollout_data_dir` (Plan A rollout mixture, 2026-06-11).
+  - SCVC experiment declares `{"override /model": "scvc_policy_fsdp"}` (2026-06-11 audit):
+    without it the config cannot compose — Hydra struct mode rejects `lambda_cv`/`cv_*`
+    against the base `CosmosPolicyVideo2WorldConfig`-typed `/model` node.
+- `cosmos_policy/config/defaults/model.py`
+  - Registers the typed `scvc_policy_fsdp` model-group node
+    (`SCVCPolicyVideo2WorldModel` + `SCVCPolicyVideo2WorldConfig`) used by the SCVC
+    experiment above. Verified by a full `load_config` compose.
 - `cosmos_policy/datasets/libero_pair_dataset.py`
   - Adds Phase-2 manifest-backed scene-only pair dataset returning `video_pair`.
   - Plan A rollout mixture (2026-06-11): embedded rollout-only `LIBERODataset`
@@ -59,3 +66,39 @@ local changes are intentional and should be reviewed before any upstream rebase.
     benchmark poses and fails on any collision.
   - `freeze_pair_holdout_manifest.py` snapshots the val pair manifest with a
     SHA256 sidecar as the frozen A2 held-out set (LOCKED DECISION 8).
+  - 2026-06-11 audit fixes: `generate_phase3_launchers.py` wires the registry seed
+    into the launch line (`trainer.seed` + `dataloader_train.sampler.seed`; without
+    this all multi-seed rows were identical runs); `validate_phase3_registry.py`
+    requires an integer seed per run; `check_scvc_batch_contract.py` derangement
+    check replicates the model's conjugated-cycle fallback instead of a strawman;
+    `summarize_pair_manifest.py` reads `task_name`; `evaluate_scvc_shrinkage.py`
+    skips fully-floor-excluded sigma bins in the aggregate (NaN poisoning).
+- 2026-06-12 plan-risk hardening (researcher-approved, 7-point external review):
+  - `scvc_policy_video2world_model.py`: `cv_frame_set` value `full` renamed to
+    `invariant_plus_fscene` (= invariant block ∪ {future-scene}; the A2
+    wrong-coordinates set — blank/conditioning frames are never in any CV set;
+    passing `full` now raises with a migration hint). W&B key
+    `scvc_cv_frame_set_full` → `scvc_cv_includes_fscene`. New init guard:
+    refuses any loss/input mask flag on or `action_loss_multiplier≠1`
+    (Prop.-2 FM-anchor + λ-bookkeeping precondition). New one-time first-step
+    contract check: branch latent shapes + all `*_latent_idx` fields identical,
+    shared (σ, n) bitwise equal post-split, invariant target frames
+    (action/proprio/fproprio/value) bitwise-shared across branches for valid
+    matched pairs.
+  - `phase3_run_registry.json`: A2 rows renamed `a2_full_*` → `a2_fscene_*`,
+    `cv_frame_set` → `invariant_plus_fscene` (nothing had run yet).
+  - `validate_phase3_registry.py`: enum updated; new ERROR if an
+    `E3_A2_wrong_coordinates` run does not use `invariant_plus_fscene`.
+  - `evaluate_scvc_shrinkage.py`: checkpoint-load override uses the new enum.
+  - `run_scvc_sanity_ladder.sh`: rung label updated.
+  - `validate_pair_future_data.py`: new same-state pair guarantees —
+    `--state-hash-check-rows` (default 256) recomputes state/action/robot-state
+    hashes from the HDF5 source and compares to the manifest (end-to-end form of
+    "assert value_0 == value_p"); `pair_type` semantics checked (matched ⇒ no
+    differing `*_hash_b`; wrong_state ⇒ `state_hash_b` present, differing,
+    `pair_confidence=0`). Functionally verified on synthetic HDF5 (clean pass;
+    injected hash corruption and diluted wrong-state control both detected).
+  - Verified: py_compile all touched files; registry validator pass (15 runs,
+    no warnings); full `load_config` compose with
+    `CV_FRAME_SET=invariant_plus_fscene` (state_t=7, chunk 25 intact); the
+    renamed-enum ValueError fires on the real config class.

@@ -198,7 +198,7 @@ def load_model(args, checkpoint: str):
         instantiate_ema=False,
         experiment_opts=[
             f"model.config.fsdp_shard_size=1",
-            f"model.config.cv_frame_set=full",
+            f"model.config.cv_frame_set=invariant_plus_fscene",
             f"model.config.cv_total_steps={args.cv_total_steps}",
         ],
         to_device=args.device,
@@ -350,7 +350,11 @@ def main() -> None:
         subset = [row for row in all_rows if row["checkpoint"] == checkpoint]
         kept = sum(int(row["num_kept"]) for row in subset)
         total = sum(int(row["num_pairs"]) for row in subset)
-        weighted = sum(float(row["global_shrinkage_ratio"]) * int(row["num_kept"]) for row in subset)
+        # Sigma bins where the floor excluded every pair report a NaN ratio; their weight is 0
+        # but NaN*0 is still NaN, so they must be skipped, not just down-weighted.
+        weighted = sum(
+            float(row["global_shrinkage_ratio"]) * int(row["num_kept"]) for row in subset if int(row["num_kept"]) > 0
+        )
         aggregate_rows.append(
             {
                 "checkpoint": checkpoint,

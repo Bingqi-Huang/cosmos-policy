@@ -9,7 +9,9 @@ from collections import Counter, defaultdict
 from typing import Any
 
 
-ALLOWED_FRAME_SETS = {"action", "action+value", "action+value+fproprio", "full"}
+# 'invariant_plus_fscene' (= invariant block ∪ {future-scene}) is the A2 wrong-coordinates set;
+# it was formerly (misleadingly) named 'full' — blank/conditioning frames are never in any CV set.
+ALLOWED_FRAME_SETS = {"action", "action+value", "action+value+fproprio", "invariant_plus_fscene"}
 ALLOWED_PAIR_MODES = {"matched", "derangement"}
 MAIN_RUN_TYPES = {"main_10k"}
 FORBIDDEN_ENV_FRAGMENTS = ("camera", "camera_params", "extrinsic", "intrinsic", "depth", "cam_pos", "cam_quat")
@@ -38,6 +40,9 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
 
     require("run_id" in run, "run missing run_id", errors)
     require("job_name" in run, f"{run_id}: missing job_name", errors)
+    # Seed is wired into the generated launcher as trainer.seed / sampler.seed overrides;
+    # a missing seed would silently collapse multi-seed rows into identical runs.
+    require(isinstance(run.get("seed"), int), f"{run_id}: seed must be an integer", errors)
     require(str(run.get("cv_frame_set")) in ALLOWED_FRAME_SETS, f"{run_id}: invalid cv_frame_set", errors)
     require(str(run.get("cv_pair_mode")) in ALLOWED_PAIR_MODES, f"{run_id}: invalid cv_pair_mode", errors)
     require(isinstance(run.get("cv_noise_shared"), bool), f"{run_id}: cv_noise_shared must be bool", errors)
@@ -68,8 +73,10 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
         else:
             errors.append(f"{run_id}: extra_env must be an object if present")
 
-    if run.get("cv_frame_set") == "full" and run.get("group") != "E3_A2_wrong_coordinates":
-        warnings.append(f"{run_id}: full frame-set outside A2")
+    if run.get("cv_frame_set") == "invariant_plus_fscene" and run.get("group") != "E3_A2_wrong_coordinates":
+        warnings.append(f"{run_id}: invariant_plus_fscene frame-set outside A2")
+    if run.get("group") == "E3_A2_wrong_coordinates" and run.get("cv_frame_set") != "invariant_plus_fscene":
+        errors.append(f"{run_id}: A2 wrong-coordinates run must use cv_frame_set=invariant_plus_fscene")
     if run.get("cv_pair_mode") == "derangement" and run.get("group") != "E3_A1_wrong_states":
         warnings.append(f"{run_id}: derangement outside A1")
     if run.get("cv_noise_shared") is False and run.get("group") != "E3_A5_wrong_noise":

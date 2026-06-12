@@ -13,7 +13,7 @@ CKPT_PATH="${CKPT_PATH:-outputs/phase1/cosmos_policy/cosmos_v2_finetune/phase1_s
 OUT_ROOT="${OUT_ROOT:-outputs/phase1/e2_row1_scene_only_eval/iter_000010000/camera_screen120}"
 TASK_ROOT="${TASK_ROOT:-outputs/phase1/libero_plus_subsets/screen_120_s7}"
 NUM_TRIALS="${NUM_TRIALS:-3}"
-SEED="${SEED:-195}"
+SEED="${SEED:-42}"
 RUN_ID_NOTE="${RUN_ID_NOTE:-scene_only_screen120}"
 
 if [[ ! -d "${CKPT_PATH}" ]]; then

@@ -98,10 +98,15 @@ def resolve(repo_root: pathlib.Path, raw: str) -> pathlib.Path:
     return path if path.is_absolute() else repo_root / path
 
 
-def pure_derangement(batch_size: int) -> list[int]:
+def conjugated_cycle_derangement(batch_size: int, sigma: list[int]) -> list[int]:
+    """Pure-Python replica of SCVCPolicyVideo2WorldModel._derangement's fallback:
+    perm[sigma] = sigma[(identity + 1) % B].  Must stay in sync with the model code."""
     if batch_size < 2:
         raise ValueError("batch_size must be >=2")
-    return list(range(1, batch_size)) + [0]
+    perm = [0] * batch_size
+    for i in range(batch_size):
+        perm[sigma[i]] = sigma[(i + 1) % batch_size]
+    return perm
 
 
 def check_manifest(rows: list[dict[str, Any]], repo_root: pathlib.Path, check_images: bool) -> dict[str, Any]:
@@ -178,13 +183,31 @@ def check_dataset_sample(args) -> dict[str, Any]:
     }
 
 
-def check_derangement() -> dict[str, Any]:
+def check_derangement(num_random_sigmas: int = 200, seed: int = 0) -> dict[str, Any]:
+    """Check the model's actual derangement construction, not a strawman.
+
+    The model first rejection-samples random permutations (correct by construction when it
+    returns: it only accepts fixed-point-free draws), then falls back to a conjugated cyclic
+    shift.  The fallback formula is the part that can silently be wrong, so it is replicated
+    here in pure Python and exercised over many random conjugating permutations sigma.
+    """
+    import random
+
+    rng = random.Random(seed)
     failures = []
     for batch_size in range(2, 65):
-        perm = pure_derangement(batch_size)
-        if sorted(perm) != list(range(batch_size)) or any(i == p for i, p in enumerate(perm)):
-            failures.append(batch_size)
-    return {"batch_sizes_checked": [2, 64], "failures": failures}
+        for _ in range(num_random_sigmas):
+            sigma = list(range(batch_size))
+            rng.shuffle(sigma)
+            perm = conjugated_cycle_derangement(batch_size, sigma)
+            if sorted(perm) != list(range(batch_size)) or any(i == p for i, p in enumerate(perm)):
+                failures.append({"batch_size": batch_size, "sigma": sigma})
+                break
+    return {
+        "batch_sizes_checked": [2, 64],
+        "random_sigmas_per_batch_size": num_random_sigmas,
+        "failures": failures,
+    }
 
 
 def main() -> None:

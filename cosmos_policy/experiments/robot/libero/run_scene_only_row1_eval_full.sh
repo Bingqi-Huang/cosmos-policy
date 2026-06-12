@@ -8,12 +8,12 @@ set -euo pipefail
 export MUJOCO_GL="${MUJOCO_GL:-egl}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
 
-GPU_IDS="${GPU_IDS:-0,1,2,3,4,5}"
+GPU_IDS="${GPU_IDS:-0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5}"
 CKPT_PATH="${CKPT_PATH:-outputs/phase1/cosmos_policy/cosmos_v2_finetune/phase1_scene_only_formal_6gpu_b30_from_libero_ckpt/checkpoints/iter_000010000}"
 OUT_ROOT="${OUT_ROOT:-outputs/phase1/e2_row1_scene_only_eval/iter_000010000}"
 ID_NUM_TRIALS="${ID_NUM_TRIALS:-50}"
 CAMERA_NUM_TRIALS="${CAMERA_NUM_TRIALS:-3}"
-SEED="${SEED:-195}"
+SEED="${SEED:-42}"
 RUN_ID_NOTE="${RUN_ID_NOTE:-row1_scene_only_iter10000}"
 RUN_ID="${RUN_ID:-all}"
 

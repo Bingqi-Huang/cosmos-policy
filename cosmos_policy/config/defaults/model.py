@@ -26,6 +26,10 @@ from cosmos_policy.models.policy_video2world_model import (
     CosmosPolicyVideo2WorldConfig,
     CosmosPolicyVideo2WorldModel,
 )
+from cosmos_policy.models.scvc_policy_video2world_model import (
+    SCVCPolicyVideo2WorldConfig,
+    SCVCPolicyVideo2WorldModel,
+)
 
 # Use policy-specific models with the same config structure
 POLICY_DDP_CONFIG = dict(
@@ -51,8 +55,25 @@ POLICY_FSDP_CONFIG = dict(
 )
 
 
+# SCVC trainer needs a typed node carrying SCVCPolicyVideo2WorldConfig: the experiment
+# LazyDicts merge plain dicts into the /model group node, and Hydra's struct mode rejects
+# keys (lambda_cv, cv_*) that the base CosmosPolicyVideo2WorldConfig does not declare.
+SCVC_POLICY_FSDP_CONFIG = dict(
+    trainer=dict(
+        distributed_parallelism="fsdp",
+    ),
+    model=L(SCVCPolicyVideo2WorldModel)(
+        config=SCVCPolicyVideo2WorldConfig(
+            fsdp_shard_size=8,
+        ),
+        _recursive_=False,
+    ),
+)
+
+
 def register_policy_model():
     """Register Cosmos Policy model configurations."""
     cs = ConfigStore.instance()
     cs.store(group="model", package="_global_", name="policy_ddp", node=POLICY_DDP_CONFIG)
     cs.store(group="model", package="_global_", name="policy_fsdp", node=POLICY_FSDP_CONFIG)
+    cs.store(group="model", package="_global_", name="scvc_policy_fsdp", node=SCVC_POLICY_FSDP_CONFIG)

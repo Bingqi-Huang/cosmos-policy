@@ -337,6 +337,9 @@ cosmos_predict2_2b_480p_libero_scvc_scene_only = LazyDict(
     dict(
         defaults=[
             "/experiment/cosmos_predict2_2b_480p_libero_scene_only",
+            # Re-override /model with the SCVC-typed node so the cv_* keys below survive
+            # Hydra struct-mode validation (see defaults/model.py SCVC_POLICY_FSDP_CONFIG).
+            {"override /model": "scvc_policy_fsdp"},
             "_self_",
         ],
         model=L(SCVCPolicyVideo2WorldModel)(
