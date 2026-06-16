@@ -391,9 +391,20 @@ def process_hdf5(
                 if max_pairs is not None and pair_count >= max_pairs:
                     break
                 future_t = min(t + chunk_size, n_steps - 1)
+                # Guarantee the views of THIS state use DISTINCT perturbed cameras:
+                # pair_id keys on the camera label (not the view index), so a within-state
+                # collision would collapse two views into one duplicate pair (and silently
+                # give the state fewer distinct views than requested). Resample on collision.
+                used_labels: set[str] = set()
                 for _view_idx in range(views_per_state):
                     cam_params = sample_camera(rng, exclude=benchmark_exclude)
                     label = camera_label(cam_params)
+                    _tries = 0
+                    while label in used_labels and _tries < 50:
+                        cam_params = sample_camera(rng, exclude=benchmark_exclude)
+                        label = camera_label(cam_params)
+                        _tries += 1
+                    used_labels.add(label)
                     current_nom, current_pert, pert_pos, pert_quat = render_state_pair(
                         env, cam_id, nom_pos, nom_quat, states[t], cam_params, img_size
                     )

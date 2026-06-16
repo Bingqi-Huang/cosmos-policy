@@ -14,7 +14,7 @@ RESULTS_DIR="${RESULTS_DIR:-${REPO}/outputs/phase2/pair_future_frames}"
 LOG_DIR="${LOG_DIR:-${REPO}/outputs/phase2/pair_future_frames/logs}"
 GPU_IDS="${GPU_IDS:-0,1,2,3,4,5}"
 TIMESTEP_SAMPLE_RATE="${TIMESTEP_SAMPLE_RATE:-1.0}"
-VIEWS_PER_STATE="${VIEWS_PER_STATE:-1}"
+VIEWS_PER_STATE="${VIEWS_PER_STATE:-2}"
 MAX_PAIRS_PER_SUITE="${MAX_PAIRS_PER_SUITE:-}"
 
 mkdir -p "${LOG_DIR}"
