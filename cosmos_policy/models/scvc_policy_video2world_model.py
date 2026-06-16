@@ -113,6 +113,31 @@ class SCVCPolicyVideo2WorldModel(CosmosPolicyVideo2WorldModel):
         batch_size = int(data_batch["video"].shape[0])
         return {key: self._permute_batch_dim(value, perm, batch_size) for key, value in paired_batch.items()}
 
+    def _derangement_perm_for_cv(self, data_batch: dict) -> torch.Tensor:
+        """Derange only valid demo-pair rows for A1, preserving rollout pass-through rows.
+
+        The pair dataset mixes 50% valid demo pairs with 50% rollout pass-through samples
+        (`pair_valid=0`). A full-batch derangement would often pair a valid demo row with
+        a rollout row, masking out that CV comparison and silently weakening the A1
+        wrong-state treatment. Deranging the valid subset keeps the active CV mass matched
+        to the normal SCVC rows while still violating same-state pairing.
+        """
+        batch_size = int(data_batch["video"].shape[0])
+        device = data_batch["video"].device
+        if batch_size < 2:
+            raise ValueError("cv_pair_mode='derangement' requires batch size >= 2")
+        perm = torch.arange(batch_size, device=device)
+        valid = self._pair_valid_mask(data_batch, device, torch.float32) > 0
+        valid_indices = torch.nonzero(valid, as_tuple=False).flatten()
+        if valid_indices.numel() >= 2:
+            subperm = self._derangement(int(valid_indices.numel()), device)
+            perm[valid_indices] = valid_indices[subperm]
+            return perm
+        # No valid wrong-state demo comparison is possible in this microbatch. A full
+        # derangement ensures any lone valid row is paired with an invalid target, so
+        # the CV mask disables it instead of accidentally comparing the row to itself.
+        return self._derangement(batch_size, device)
+
     def _reduce_like_base(self, loss: torch.Tensor) -> torch.Tensor:
         if self.loss_reduce == "mean":
             return loss.mean()
@@ -323,7 +348,7 @@ class SCVCPolicyVideo2WorldModel(CosmosPolicyVideo2WorldModel):
 
         derange_perm = None
         if self.config.cv_pair_mode == "derangement":
-            derange_perm = self._derangement(int(data_batch["video"].shape[0]), data_batch["video"].device)
+            derange_perm = self._derangement_perm_for_cv(data_batch)
         paired_batch = self._make_paired_batch(data_batch, derange_perm)
 
         total_fm = None

@@ -40,6 +40,9 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
     grad_accum_iter = int(run.get("grad_accum_iter", common.get("grad_accum_iter", 0)))
     effective_batch = int(run.get("effective_batch", common.get("effective_batch", 0)))
     budget = int(run.get("budget_sample_presentations", common.get("budget_sample_presentations", 0)))
+    optimizer_lr = float(run.get("optimizer_lr", common.get("optimizer_lr", 0.0)))
+    ema_enabled = bool(run.get("ema_enabled", common.get("ema_enabled", False)))
+    load_ema_to_reg = bool(run.get("load_ema_to_reg", common.get("load_ema_to_reg", True)))
 
     require("run_id" in run, "run missing run_id", errors)
     require("job_name" in run, f"{run_id}: missing job_name", errors)
@@ -60,6 +63,17 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
         require(cv_num_samples == 2, f"{run_id}: cv_num_samples must be 2", errors)
         require(num_gpus == 6, f"{run_id}: num_gpus must be 6", errors)
         require(fsdp_shard_size == 6, f"{run_id}: fsdp_shard_size must be 6", errors)
+        require(
+            abs(optimizer_lr - 5e-5) < 1e-12,
+            f"{run_id}: optimizer_lr must be the frozen baseline value 5e-5, got {optimizer_lr}",
+            errors,
+        )
+        require(ema_enabled, f"{run_id}: ema_enabled must be true to match the frozen baseline recipe", errors)
+        require(
+            not load_ema_to_reg,
+            f"{run_id}: load_ema_to_reg must be false when EMA training is enabled from the released checkpoint",
+            errors,
+        )
         # Budget arithmetic: grad_accum x bs x gpus = effective batch; x max_iter = sample
         # presentations. Must equal the frozen 7.2M budget, else the run is silently off-budget
         # (the SCVC config default grad_accum=1 would yield eff batch 60 = 1/12 of the budget).

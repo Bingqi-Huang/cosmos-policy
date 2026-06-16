@@ -210,6 +210,38 @@ def check_derangement(num_random_sigmas: int = 200, seed: int = 0) -> dict[str, 
     }
 
 
+def check_valid_subset_derangement() -> dict[str, Any]:
+    """Pure-Python contract for A1: derange valid demo-pair rows without CV dilution."""
+
+    failures = []
+    cases = [
+        [1, 1, 1, 0, 0, 0],
+        [1, 0, 1, 0, 1, 0],
+        [1, 1, 0, 0],
+        [1, 0, 0, 0],
+        [0, 0, 0, 0],
+    ]
+    for valid in cases:
+        batch_size = len(valid)
+        valid_indices = [i for i, v in enumerate(valid) if v]
+        if len(valid_indices) >= 2:
+            subperm = conjugated_cycle_derangement(len(valid_indices), list(range(len(valid_indices))))
+            perm = list(range(batch_size))
+            for src_pos, dst_pos in enumerate(subperm):
+                perm[valid_indices[src_pos]] = valid_indices[dst_pos]
+            active = [bool(valid[i] and valid[perm[i]]) for i in range(batch_size)]
+            if sum(active) != len(valid_indices) or any(i == perm[i] for i in valid_indices):
+                failures.append({"case": valid, "perm": perm, "active": active})
+        else:
+            # With fewer than 2 valid rows, a wrong-state valid comparison is impossible;
+            # the model falls back to a full-batch derangement so active CV must be zero.
+            perm = conjugated_cycle_derangement(batch_size, list(range(batch_size)))
+            active = [bool(valid[i] and valid[perm[i]]) for i in range(batch_size)]
+            if any(active):
+                failures.append({"case": valid, "perm": perm, "active": active})
+    return {"cases_checked": len(cases), "failures": failures}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--manifest", required=True)
@@ -230,6 +262,7 @@ def main() -> None:
         "repo_root": str(repo_root),
         "manifest_checks": check_manifest(rows, repo_root=repo_root, check_images=args.check_images),
         "derangement_checks": check_derangement(),
+        "valid_subset_derangement_checks": check_valid_subset_derangement(),
     }
     if args.dataset_sample:
         report["dataset_sample_checks"] = check_dataset_sample(args)
@@ -241,6 +274,9 @@ def main() -> None:
     d = report["derangement_checks"]
     if d["failures"]:
         failures.append("derangement")
+    vd = report["valid_subset_derangement_checks"]
+    if vd["failures"]:
+        failures.append("valid_subset_derangement")
     if "dataset_sample_checks" in report:
         s = report["dataset_sample_checks"]
         if s["layout_errors"] or s["forbidden_model_keys"]:

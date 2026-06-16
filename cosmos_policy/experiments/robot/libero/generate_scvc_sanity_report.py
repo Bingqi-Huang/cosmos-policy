@@ -17,6 +17,8 @@ def load_json(path: pathlib.Path) -> dict[str, Any]:
 def status_mark(status: str) -> str:
     if status == "pass":
         return "PASS"
+    if status == "partial_pass":
+        return "PARTIAL PASS"
     if status == "missing":
         return "MISSING"
     if status in {"pending", "skipped"}:

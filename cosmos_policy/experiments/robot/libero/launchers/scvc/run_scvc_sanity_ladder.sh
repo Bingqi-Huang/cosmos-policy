@@ -34,6 +34,9 @@ uv run --extra cu128 --group libero --python 3.10 \
   python cosmos_policy/experiments/robot/libero/check_scvc_batch_contract.py "${CONTRACT_ARGS[@]}"
 
 if [[ "${RUN_GPU:-0}" != "1" ]]; then
+  if [[ -f "${OUT_DIR}/gpu_ladder.json" && "${RESET_GPU_LADDER:-0}" != "1" ]]; then
+    echo "[sanity] preserving existing ${OUT_DIR}/gpu_ladder.json; set RESET_GPU_LADDER=1 to reset it to pending."
+  else
   cat > "${OUT_DIR}/gpu_ladder.json" <<'JSON'
 {
   "status": "pending",
@@ -47,6 +50,7 @@ if [[ "${RUN_GPU:-0}" != "1" ]]; then
   ]
 }
 JSON
+  fi
 else
   echo "RUN_GPU=1 requested.  Launch GPU rungs from the experiment registry; this harness only records the gate."
   cat > "${OUT_DIR}/gpu_ladder.json" <<'JSON'

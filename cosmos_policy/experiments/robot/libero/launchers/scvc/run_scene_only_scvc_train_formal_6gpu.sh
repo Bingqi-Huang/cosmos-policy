@@ -4,6 +4,8 @@ set -euo pipefail
 # Prepared launcher for scene-only P2 SCVC / A1 / A2 / A5 training.
 # Do not run until Phase-2 pair manifests and the two-branch memory smoke are done.
 
+cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)"
+
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,2,3,4,5}"
 export BASE_DATASETS_DIR="${BASE_DATASETS_DIR:-.}"
 export IMAGINAIRE_OUTPUT_ROOT="${IMAGINAIRE_OUTPUT_ROOT:-outputs/phase3}"
@@ -38,11 +40,17 @@ PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-10}"
 # 7.2M sample presentations = the frozen budget (execution_plan §67/§73, LOCKED DECISION 9).
 # Without this the config default (1) would yield eff batch 60 = 1/12 of the budget.
 GRAD_ACCUM_ITER="${GRAD_ACCUM_ITER:-12}"
+LR="${LR:-5e-5}"
+EMA_ENABLED="${EMA_ENABLED:-True}"
+LOAD_EMA_TO_REG="${LOAD_EMA_TO_REG:-False}"
 PAIR_MANIFEST_PATH="${PAIR_MANIFEST_PATH:-outputs/phase2/pair_future_frames/libero_pair_future_manifest_train.jsonl}"
 JOB_NAME="${JOB_NAME:-phase3_scene_only_scvc_6gpu_b10_lambda010}"
 
 export PAIR_BATCH_SIZE
 export GRAD_ACCUM_ITER
+export LR
+export EMA_ENABLED
+export LOAD_EMA_TO_REG
 export PAIR_MANIFEST_PATH
 export JOB_NAME
 export LAMBDA_CV="${LAMBDA_CV:-0.1}"
@@ -64,4 +72,7 @@ uv run --extra cu128 --group libero --python 3.10 \
   job.name="${JOB_NAME}" \
   job.wandb_mode="${WANDB_MODE}" \
   model.config.fsdp_shard_size="${FSDP_SHARD_SIZE}" \
+  model.config.ema.enabled="${EMA_ENABLED}" \
+  checkpoint.load_ema_to_reg="${LOAD_EMA_TO_REG}" \
+  optimizer.lr="${LR}" \
   "$@"

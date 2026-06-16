@@ -7,7 +7,7 @@ fuse that kills the run group if available RAM drops too low (6 ranks x 8 worker
 balloon host memory).
 
 For each bs it launches a real ~4-step SCVC training run (grad_accum=1, since grad_accum
-does not change peak memory -- micro-batches are sequential; save disabled), polls
+does not change peak memory -- micro-batches are sequential; periodic save disabled), polls
 nvidia-smi + /proc/meminfo, records peak per-GPU NVML and min available RAM, and detects
 CUDA OOM. Pick the largest bs with peak <= the chosen ceiling, then set the real-run
 grad_accum = 720 / (6*bs) to preserve the 7.2M sample-presentation budget.
@@ -63,7 +63,7 @@ def run_one(bs: int, args) -> dict:
         "MAX_ITER": str(args.max_iter),
         "SAVE_ITER": "99999999",          # never save a checkpoint during the smoke
         "CV_NUM_SAMPLES": str(args.cv_num_samples),
-        "JOB_NAME": job,
+        "JOB_NAME": job,                  # run/output name only; CLI job.name= override below
         "WANDB_MODE": "disabled",
         "PAIR_MANIFEST_PATH": args.manifest,
     })
@@ -122,7 +122,7 @@ def main() -> None:
     ap.add_argument("--max-iter", type=int, default=4)
     ap.add_argument("--ram-floor-gb", type=float, default=30.0)
     ap.add_argument("--gpu-ceiling-gb", type=float, default=92.0)
-    ap.add_argument("--poll-sec", type=float, default=4.0)
+    ap.add_argument("--poll-sec", type=float, default=0.25)
     ap.add_argument("--manifest", default="outputs/phase2/pair_future_frames/libero_pair_future_manifest_train.jsonl")
     ap.add_argument("--output-json", default="outputs/phase2/scvc_mem_smoke/report.json")
     args = ap.parse_args()
