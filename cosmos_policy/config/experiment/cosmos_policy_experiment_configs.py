@@ -356,7 +356,7 @@ cosmos_predict2_2b_480p_libero_scvc_scene_only = LazyDict(
                 cv_frame_set=os.environ.get("CV_FRAME_SET", "action+value+fproprio"),
                 cv_noise_shared=os.environ.get("CV_NOISE_SHARED", "true").lower() == "true",
                 cv_pair_mode=os.environ.get("CV_PAIR_MODE", "matched"),
-                cv_num_samples=int(os.environ.get("CV_NUM_SAMPLES", "2")),
+                cv_num_samples=1,
                 cv_total_steps=int(os.environ.get("CV_TOTAL_STEPS", os.environ.get("MAX_ITER", "10000"))),
             ),
         ),

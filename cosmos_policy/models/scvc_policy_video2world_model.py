@@ -21,7 +21,7 @@ class SCVCPolicyVideo2WorldConfig(CosmosPolicyVideo2WorldConfig):
     cv_frame_set: str = "action+value+fproprio"
     cv_noise_shared: bool = True
     cv_pair_mode: str = "matched"  # matched | derangement
-    cv_num_samples: int = 2
+    cv_num_samples: int = 1  # single shared (sigma, n) draw per pair (standard diffusion convention)
     cv_total_steps: int = 10000
 
     def __attrs_post_init__(self):

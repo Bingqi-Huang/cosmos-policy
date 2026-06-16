@@ -33,7 +33,6 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
     max_iter = int(run.get("max_iter", common.get("max_iter", 0)))
     save_iter = int(run.get("save_iter", common.get("save_iter", 0)))
     pair_batch_size = int(run.get("pair_batch_size", common.get("pair_batch_size", 0)))
-    cv_num_samples = int(run.get("cv_num_samples", common.get("cv_num_samples", 0)))
     cv_total_steps = int(run.get("cv_total_steps", common.get("cv_total_steps", 0)))
     fsdp_shard_size = int(run.get("fsdp_shard_size", common.get("fsdp_shard_size", 0)))
     num_gpus = int(run.get("num_gpus", common.get("num_gpus", 0)))
@@ -60,7 +59,6 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
         require(cv_total_steps == 10000, f"{run_id}: main_10k cv_total_steps must be 10000", errors)
         require(save_iter == 1000, f"{run_id}: save_iter must be 1000", errors)
         require(pair_batch_size == 10, f"{run_id}: pair_batch_size must be 10 until memory smoke changes registry", errors)
-        require(cv_num_samples == 2, f"{run_id}: cv_num_samples must be 2", errors)
         require(num_gpus == 6, f"{run_id}: num_gpus must be 6", errors)
         require(fsdp_shard_size == 6, f"{run_id}: fsdp_shard_size must be 6", errors)
         require(

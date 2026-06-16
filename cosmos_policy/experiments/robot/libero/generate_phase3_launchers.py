@@ -38,7 +38,6 @@ def script_for_run(run: dict[str, Any], common: dict[str, Any]) -> str:
         "CV_FRAME_SET": run["cv_frame_set"],
         "CV_NOISE_SHARED": run["cv_noise_shared"],
         "CV_PAIR_MODE": run["cv_pair_mode"],
-        "CV_NUM_SAMPLES": run.get("cv_num_samples", common["cv_num_samples"]),
         "CV_TOTAL_STEPS": run.get("cv_total_steps", common["cv_total_steps"]),
         "MAX_ITER": run.get("max_iter", common["max_iter"]),
         "SAVE_ITER": run.get("save_iter", common["save_iter"]),
