@@ -384,7 +384,13 @@ cosmos_predict2_2b_480p_libero_scvc_scene_only = LazyDict(
         ),
         job=dict(
             group="cosmos_v2_finetune",
-            name=os.environ.get("JOB_NAME", "cosmos_predict2_2b_480p_libero_scvc_scene_only"),
+            # FIXED registration name. register_configs() keys the Hydra experiment on
+            # job.name, so reading JOB_NAME here made the experiment register under the
+            # per-run name (e.g. phase3_row3_...) while `experiment=...scvc_scene_only`
+            # lookups still wanted the default — every grid row crashed at startup.
+            # The per-run name is supplied by the launcher's `job.name=${JOB_NAME}` CLI
+            # override, which does not affect the registration key.
+            name="cosmos_predict2_2b_480p_libero_scvc_scene_only",
         ),
     )
 )
