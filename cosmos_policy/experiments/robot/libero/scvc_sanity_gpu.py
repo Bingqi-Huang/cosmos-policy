@@ -120,8 +120,11 @@ def gate2_overfit(args, device):
     fm_curve = []
     cv_curve = []
     for step in range(args.overfit_steps):
+        # training_step normalizes video in-place and consumes batch keys, so feed a
+        # fresh shallow-cloned batch each step (same fixed data, uncorrupted).
+        step_batch = {k: (v.clone() if torch.is_tensor(v) else v) for k, v in batch.items()}
         with torch.autocast("cuda", dtype=torch.bfloat16):
-            out, loss = model.training_step(batch, iteration=step)
+            out, loss = model.training_step(step_batch, iteration=step)
         opt.zero_grad(set_to_none=True)
         loss.backward()
         opt.step()
