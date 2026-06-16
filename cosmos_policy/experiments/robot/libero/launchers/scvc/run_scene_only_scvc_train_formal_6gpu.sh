@@ -35,11 +35,13 @@ export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-lo}"
 
 NUM_GPUS="${NUM_GPUS:-6}"
 FSDP_SHARD_SIZE="${FSDP_SHARD_SIZE:-6}"
-PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-10}"
-# grad_accum=12 with bs10 x 6 GPUs = effective batch 720; at MAX_ITER=10000 that is
+PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-24}"
+# bs24 x 6 GPUs x grad_accum=5 = effective batch 720; at MAX_ITER=10000 that is
 # 7.2M sample presentations = the frozen budget (execution_plan §67/§73, LOCKED DECISION 9).
-# Without this the config default (1) would yield eff batch 60 = 1/12 of the budget.
-GRAD_ACCUM_ITER="${GRAD_ACCUM_ITER:-12}"
+# bs24/accum5 mirrors the frozen Row-1 baseline's local-batch-24 recipe exactly. K_s=1
+# memory smoke: bs24 peak 86.8GB (fits 96GB cards). Without GRAD_ACCUM_ITER the config
+# default (1) would yield eff batch 144 = 1/5 of the budget.
+GRAD_ACCUM_ITER="${GRAD_ACCUM_ITER:-5}"
 LR="${LR:-5e-5}"
 EMA_ENABLED="${EMA_ENABLED:-True}"
 LOAD_EMA_TO_REG="${LOAD_EMA_TO_REG:-False}"

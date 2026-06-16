@@ -58,7 +58,7 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
         require(max_iter == 10000, f"{run_id}: main_10k max_iter must be 10000", errors)
         require(cv_total_steps == 10000, f"{run_id}: main_10k cv_total_steps must be 10000", errors)
         require(save_iter == 1000, f"{run_id}: save_iter must be 1000", errors)
-        require(pair_batch_size == 10, f"{run_id}: pair_batch_size must be 10 until memory smoke changes registry", errors)
+        require(pair_batch_size == 24, f"{run_id}: pair_batch_size must be 24 (K_s=1 memory smoke: aligns the frozen baseline local batch 24; peak 86.8GB)", errors)
         require(num_gpus == 6, f"{run_id}: num_gpus must be 6", errors)
         require(fsdp_shard_size == 6, f"{run_id}: fsdp_shard_size must be 6", errors)
         require(
