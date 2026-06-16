@@ -4,7 +4,7 @@ set -euo pipefail
 # Prepared launcher for Phase-2 same-state pair future-frame rendering.
 # Do not run while training owns the GPUs.
 
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
 PYTHON="${PYTHON:-${REPO}/.venv/bin/python}"
 SCRIPT="${REPO}/cosmos_policy/experiments/robot/libero/render_libero_pair_future_frames.py"
 
@@ -21,9 +21,16 @@ mkdir -p "${LOG_DIR}"
 IFS=',' read -r -a GPU_ARRAY <<< "${GPU_IDS}"
 N_SHARDS="${#GPU_ARRAY[@]}"
 
+# Suite selection. Default is the full 4-suite set; set SUITE_OVERRIDE to a
+# space-separated subset (e.g. SUITE_OVERRIDE="libero_spatial_regen") to run a
+# genuine single-suite pilot. Word-splitting on SUITE_OVERRIDE is intentional.
+DEFAULT_SUITES="libero_spatial_regen libero_object_regen libero_goal_regen libero_10_regen"
+read -r -a SUITE_ARRAY <<< "${SUITE_OVERRIDE:-${DEFAULT_SUITES}}"
+echo "[launch] suites: ${SUITE_ARRAY[*]}"
+
 COMMON_ARGS=(
   --libero-root "${LIBERO_ROOT}"
-  --suite libero_spatial_regen libero_object_regen libero_goal_regen libero_10_regen
+  --suite "${SUITE_ARRAY[@]}"
   --output-dir "${OUTPUT_DIR}"
   --results-dir "${RESULTS_DIR}"
   --img-size 256
@@ -54,4 +61,4 @@ done
 
 printf '%s\n' "${PIDS[@]}" > "${LOG_DIR}/render_pair_future_pids.txt"
 echo "[launch] PIDs: ${PIDS[*]}"
-echo "[next] after all finish: bash cosmos_policy/experiments/robot/libero/merge_pair_future_shards.sh"
+echo "[next] after all finish: bash cosmos_policy/experiments/robot/libero/launchers/pair_data/merge_pair_future_shards.sh"
