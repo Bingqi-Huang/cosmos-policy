@@ -37,6 +37,9 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
     cv_total_steps = int(run.get("cv_total_steps", common.get("cv_total_steps", 0)))
     fsdp_shard_size = int(run.get("fsdp_shard_size", common.get("fsdp_shard_size", 0)))
     num_gpus = int(run.get("num_gpus", common.get("num_gpus", 0)))
+    grad_accum_iter = int(run.get("grad_accum_iter", common.get("grad_accum_iter", 0)))
+    effective_batch = int(run.get("effective_batch", common.get("effective_batch", 0)))
+    budget = int(run.get("budget_sample_presentations", common.get("budget_sample_presentations", 0)))
 
     require("run_id" in run, "run missing run_id", errors)
     require("job_name" in run, f"{run_id}: missing job_name", errors)
@@ -57,6 +60,22 @@ def validate_run(run: dict[str, Any], common: dict[str, Any], errors: list[str],
         require(cv_num_samples == 2, f"{run_id}: cv_num_samples must be 2", errors)
         require(num_gpus == 6, f"{run_id}: num_gpus must be 6", errors)
         require(fsdp_shard_size == 6, f"{run_id}: fsdp_shard_size must be 6", errors)
+        # Budget arithmetic: grad_accum x bs x gpus = effective batch; x max_iter = sample
+        # presentations. Must equal the frozen 7.2M budget, else the run is silently off-budget
+        # (the SCVC config default grad_accum=1 would yield eff batch 60 = 1/12 of the budget).
+        require(grad_accum_iter > 0, f"{run_id}: grad_accum_iter must be set (>0)", errors)
+        require(
+            grad_accum_iter * pair_batch_size * num_gpus == effective_batch,
+            f"{run_id}: effective_batch {effective_batch} != grad_accum {grad_accum_iter} x bs "
+            f"{pair_batch_size} x gpus {num_gpus} = {grad_accum_iter * pair_batch_size * num_gpus}",
+            errors,
+        )
+        require(
+            effective_batch * max_iter == budget == 7_200_000,
+            f"{run_id}: sample presentations {effective_batch * max_iter} (eff {effective_batch} x "
+            f"iter {max_iter}) must equal the frozen budget 7,200,000 (registry budget={budget})",
+            errors,
+        )
     elif run_type == "planned_not_launchable":
         require(not launchable, f"{run_id}: planned_not_launchable must not be launchable", errors)
         require("blocked_by" in run, f"{run_id}: planned_not_launchable needs blocked_by", errors)

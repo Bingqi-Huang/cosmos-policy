@@ -28,6 +28,7 @@ def script_for_run(run: dict[str, Any], common: dict[str, Any]) -> str:
         "NUM_GPUS": run.get("num_gpus", common["num_gpus"]),
         "FSDP_SHARD_SIZE": run.get("fsdp_shard_size", common["fsdp_shard_size"]),
         "PAIR_BATCH_SIZE": run.get("pair_batch_size", common["pair_batch_size"]),
+        "GRAD_ACCUM_ITER": run.get("grad_accum_iter", common["grad_accum_iter"]),
         "PAIR_MANIFEST_PATH": common["pair_manifest_train"],
         "JOB_NAME": run["job_name"],
         "LAMBDA_CV": run["lambda_cv"],

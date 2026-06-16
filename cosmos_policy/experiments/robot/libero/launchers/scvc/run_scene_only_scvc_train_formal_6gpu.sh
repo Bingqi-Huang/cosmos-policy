@@ -34,10 +34,15 @@ export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-lo}"
 NUM_GPUS="${NUM_GPUS:-6}"
 FSDP_SHARD_SIZE="${FSDP_SHARD_SIZE:-6}"
 PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-10}"
+# grad_accum=12 with bs10 x 6 GPUs = effective batch 720; at MAX_ITER=10000 that is
+# 7.2M sample presentations = the frozen budget (execution_plan §67/§73, LOCKED DECISION 9).
+# Without this the config default (1) would yield eff batch 60 = 1/12 of the budget.
+GRAD_ACCUM_ITER="${GRAD_ACCUM_ITER:-12}"
 PAIR_MANIFEST_PATH="${PAIR_MANIFEST_PATH:-outputs/phase2/pair_future_frames/libero_pair_future_manifest_train.jsonl}"
 JOB_NAME="${JOB_NAME:-phase3_scene_only_scvc_6gpu_b10_lambda010}"
 
 export PAIR_BATCH_SIZE
+export GRAD_ACCUM_ITER
 export PAIR_MANIFEST_PATH
 export JOB_NAME
 export LAMBDA_CV="${LAMBDA_CV:-0.1}"
@@ -54,6 +59,7 @@ uv run --extra cu128 --group libero --python 3.10 \
   --config=cosmos_policy/config/config.py -- \
   experiment=cosmos_predict2_2b_480p_libero_scvc_scene_only \
   trainer.max_iter="${MAX_ITER:-10000}" \
+  trainer.grad_accum_iter="${GRAD_ACCUM_ITER}" \
   checkpoint.save_iter="${SAVE_ITER:-1000}" \
   job.name="${JOB_NAME}" \
   job.wandb_mode="${WANDB_MODE}" \
