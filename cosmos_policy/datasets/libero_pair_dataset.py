@@ -64,7 +64,32 @@ class LIBEROPairDataset(Dataset):
         gamma: float = 0.99,
         rollout_data_dir: str = "",
         success_rollout_sampling_prob: float = 0.5,
+        # Inherited from the scene_only parent experiment via Hydra defaults merge. This
+        # dataset is scene-only by construction (it renders agentview pairs and feeds the
+        # embedded rollout LIBERODataset with use_wrist_images=False); accept and assert
+        # the scene-only values so the inherited keys don't crash instantiation and a
+        # wrist-enabled misconfig is caught loudly rather than silently ignored.
+        use_wrist_images: bool = False,
+        use_third_person_images: bool = True,
+        # Also inherited from the scene_only parent via Hydra merge; inert for this dataset.
+        # demonstration_sampling_prob: the pair (demo) half is 100% pair records by
+        #   construction, and the embedded rollout LIBERODataset hardcodes
+        #   demonstration_sampling_prob=0.0, so this value does not apply here.
+        # lazy_load_demos: this dataset reads frames from the manifest on demand (already
+        #   lazy), so there is nothing to toggle.
+        demonstration_sampling_prob: float = 0.0,
+        lazy_load_demos: bool = False,
+        # treat_success_rollouts_as_demos: a LIBERODataset knob merged in from the deeper
+        #   parent chain; the embedded rollout LIBERODataset owns this behaviour, the pair
+        #   half is demos-as-pairs by construction, so it is inert at this level.
+        treat_success_rollouts_as_demos: bool = False,
     ) -> None:
+        if use_wrist_images or not use_third_person_images:
+            raise ValueError(
+                "LIBEROPairDataset is scene-only: requires use_wrist_images=False and "
+                f"use_third_person_images=True, got use_wrist_images={use_wrist_images}, "
+                f"use_third_person_images={use_third_person_images}."
+            )
         self.data_dir = data_dir
         self.pair_manifest_path = pair_manifest_path
         self.repo_root = Path(repo_root).resolve()
