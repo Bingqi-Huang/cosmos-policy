@@ -1,0 +1,88 @@
+{
+  "launchers": [
+    {
+      "job_name": "phase3_row3_pair_fm_only_seed42",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/row3_pair_fm_only_seed42.sh",
+      "run_id": "row3_pair_fm_only_seed42"
+    },
+    {
+      "job_name": "phase3_row3_pair_fm_only_seed43",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/row3_pair_fm_only_seed43.sh",
+      "run_id": "row3_pair_fm_only_seed43"
+    },
+    {
+      "job_name": "phase3_row4_scvc_lambda010_seed42",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/row4_scvc_seed42.sh",
+      "run_id": "row4_scvc_seed42"
+    },
+    {
+      "job_name": "phase3_row4_scvc_lambda010_seed43",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/row4_scvc_seed43.sh",
+      "run_id": "row4_scvc_seed43"
+    },
+    {
+      "job_name": "phase3_a1_derangement_lambda010_seed42",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a1_derangement_seed42.sh",
+      "run_id": "a1_derangement_seed42"
+    },
+    {
+      "job_name": "phase3_a1_derangement_lambda010_seed43",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a1_derangement_seed43.sh",
+      "run_id": "a1_derangement_seed43"
+    },
+    {
+      "job_name": "phase3_a2_fscene_lambda010_seed42",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a2_fscene_lambda010_seed42.sh",
+      "run_id": "a2_fscene_lambda010_seed42"
+    },
+    {
+      "job_name": "phase3_a2_fscene_lambda010_seed43",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a2_fscene_lambda010_seed43.sh",
+      "run_id": "a2_fscene_lambda010_seed43"
+    },
+    {
+      "job_name": "phase3_a2_fscene_lambda050_seed42",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a2_fscene_lambda050_seed42.sh",
+      "run_id": "a2_fscene_lambda050_seed42"
+    },
+    {
+      "job_name": "phase3_a2_fscene_lambda050_seed43",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a2_fscene_lambda050_seed43.sh",
+      "run_id": "a2_fscene_lambda050_seed43"
+    },
+    {
+      "job_name": "phase3_a2_fscene_lambda200_seed42",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a2_fscene_lambda200_seed42.sh",
+      "run_id": "a2_fscene_lambda200_seed42"
+    },
+    {
+      "job_name": "phase3_a2_fscene_lambda200_seed43",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a2_fscene_lambda200_seed43.sh",
+      "run_id": "a2_fscene_lambda200_seed43"
+    },
+    {
+      "job_name": "phase3_a5_ind_noise_default_lambda010_seed42",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a5_independent_noise_default_seed42.sh",
+      "run_id": "a5_independent_noise_default_seed42"
+    },
+    {
+      "job_name": "phase3_a5_ind_noise_default_lambda010_seed43",
+      "launcher": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated/a5_independent_noise_default_seed43.sh",
+      "run_id": "a5_independent_noise_default_seed43"
+    }
+  ],
+  "num_launchers": 14,
+  "output_dir": "cosmos_policy/experiments/robot/libero/launchers/scvc/generated",
+  "registry": "cosmos_policy/experiments/robot/libero/phase3_run_registry.json",
+  "registry_summary": {
+    "by_group": {
+      "E2_row3_pair_fm_only": 2,
+      "E2_row4_scvc": 2,
+      "E3_A1_wrong_states": 2,
+      "E3_A2_wrong_coordinates": 6,
+      "E3_A5_wrong_noise": 3
+    },
+    "num_launchable": 14,
+    "num_runs": 15
+  }
+}

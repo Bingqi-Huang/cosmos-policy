@@ -73,7 +73,7 @@ def script_for_run(run: dict[str, Any], common: dict[str, Any]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--registry", default="cosmos_policy/experiments/robot/libero/phase3_run_registry.json")
-    parser.add_argument("--output-dir", default="outputs/phase3/launchers")
+    parser.add_argument("--output-dir", default="cosmos_policy/experiments/robot/libero/launchers/scvc/generated")
     parser.add_argument("--include-planned", action="store_true", help="Also emit commented placeholders for planned-not-launchable rows")
     args = parser.parse_args()
 
