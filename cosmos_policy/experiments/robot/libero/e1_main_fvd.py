@@ -142,16 +142,23 @@ def relative_degradation(
 # ---------------------------------------------------------------------------
 # I3D feature extractor (GPU-bound; isolated, not exercised by CPU tests)
 # ---------------------------------------------------------------------------
+# Default location for the FVD I3D backbone (the StyleGAN-V `i3d_torchscript.pt`); the
+# launcher/rsync put it here so the extractor works with no env var or code edit.
+_DEFAULT_I3D_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "assets", "fvd", "i3d_torchscript.pt")
+
+
 class I3DFeatureExtractor:
     """TorchScript I3D backbone for FVD. Loaded lazily; runs on the configured device.
 
-    The checkpoint path comes from ``E1_I3D_CKPT`` (or the ``ckpt_path`` arg). Clips are
-    resized to 224x224, scaled to [-1, 1], and laid out as [B, 3, T, H, W] (the I3D
-    TorchScript contract used by the standard FVD implementations).
+    Uses the standard StyleGAN-V ``i3d_torchscript.pt`` contract: input ``[B, 3, T, H, W]``
+    in [-1, 1], called as ``model(x, rescale=False, resize=False, return_features=True)`` →
+    ``[B, 400]`` features (verified against the checkpoint). Clips arrive as ``[T, H, W, 3]``
+    in [0, 1]; we permute, resize to 224, and rescale to [-1, 1] here. The checkpoint path
+    comes from ``ckpt_path`` → ``E1_I3D_CKPT`` → the in-repo ``assets/fvd/`` default.
     """
 
     def __init__(self, ckpt_path: str | None = None, device: str = "cuda", target_size: int = 224):
-        self.ckpt_path = ckpt_path or os.environ.get("E1_I3D_CKPT", "")
+        self.ckpt_path = ckpt_path or os.environ.get("E1_I3D_CKPT", "") or os.path.abspath(_DEFAULT_I3D_PATH)
         self.device = device
         self.target_size = target_size
         self._model = None
@@ -183,7 +190,7 @@ class I3DFeatureExtractor:
                     t, size=(t.shape[2], self.target_size, self.target_size), mode="trilinear", align_corners=False
                 )
                 t = t * 2.0 - 1.0  # [0,1] -> [-1,1]
-                feat = self._model(t)
+                feat = self._model(t, rescale=False, resize=False, return_features=True)
                 feats.append(feat.reshape(feat.shape[0], -1).cpu().numpy())
         return np.concatenate(feats, axis=0)
 
