@@ -157,10 +157,13 @@ class I3DFeatureExtractor:
     comes from ``ckpt_path`` → ``E1_I3D_CKPT`` → the in-repo ``assets/fvd/`` default.
     """
 
-    def __init__(self, ckpt_path: str | None = None, device: str = "cuda", target_size: int = 224):
+    def __init__(
+        self, ckpt_path: str | None = None, device: str = "cuda", target_size: int = 224, min_frames: int = 16
+    ):
         self.ckpt_path = ckpt_path or os.environ.get("E1_I3D_CKPT", "") or os.path.abspath(_DEFAULT_I3D_PATH)
         self.device = device
         self.target_size = target_size
+        self.min_frames = min_frames  # I3D needs enough temporal frames; short clips are repeat-padded
         self._model = None
 
     def _ensure_model(self):
@@ -183,7 +186,16 @@ class I3DFeatureExtractor:
         feats: list[np.ndarray] = []
         with torch.no_grad():
             for clip in clips:
-                arr = np.asarray(clip, dtype=np.float32)  # [T, H, W, 3] in [0, 1]
+                arr = np.asarray(clip, dtype=np.float32)  # [T, H, W, 3]
+                # Clips are stored as uint8 [0,255]; the I3D contract wants [-1,1].
+                if arr.size and arr.max() > 1.0:
+                    arr = arr / 255.0
+                # I3D temporally downsamples ~8x then avg-pools with kernel T=2, so clips
+                # shorter than min_frames collapse to T=1 and crash. Pad by repeating the
+                # last frame (uniform for model + GT clips, so the FVD comparison is fair).
+                if arr.shape[0] < self.min_frames:
+                    pad = np.repeat(arr[-1:], self.min_frames - arr.shape[0], axis=0)
+                    arr = np.concatenate([arr, pad], axis=0)
                 t = torch.from_numpy(arr).to(self.device)
                 t = t.permute(3, 0, 1, 2).unsqueeze(0)  # [1, 3, T, H, W]
                 t = F.interpolate(
