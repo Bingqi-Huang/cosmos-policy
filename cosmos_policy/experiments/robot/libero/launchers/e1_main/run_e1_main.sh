@@ -61,7 +61,7 @@ if [[ -f "${MODEL_MANIFEST}" ]]; then
 else
   for suite in ${SUITES}; do
     echo "[E1-main] Stage A: model-future rollouts for ${suite}"
-    uv run --extra cu128 --group libero --python 3.10 \
+    uv run --no-sync --extra cu128 --group libero --python 3.10 \
       python cosmos_policy/experiments/robot/libero/run_libero_camera_parallel.py \
         --task_suite_name "${suite}" \
         --camera_tasks_file "${CAMERA_TASKS_DIR}/camera_task_names_${suite}.json" \
@@ -83,7 +83,7 @@ fi
 # ---- Stage B: GT-replay future clips at the benchmark eval cameras --------
 for suite in ${SUITES}; do
   echo "[E1-main] Stage B: GT futures for ${suite}"
-  uv run --extra cu128 --group libero --python 3.10 \
+  uv run --no-sync --extra cu128 --group libero --python 3.10 \
     python cosmos_policy/experiments/robot/libero/e1_main_render_gt_futures.py \
       --camera_tasks_file "${CAMERA_TASKS_DIR}/camera_task_names_${suite}.json" \
       --suite "${suite}" \
@@ -96,7 +96,7 @@ cat "${OUT}"/gt_futures/gt_futures_manifest_*.jsonl > "${GT_MANIFEST}" 2>/dev/nu
 # ---- Stage C: per-cell excess-FVD ----------------------------------------
 if [[ -n "${I3D_CKPT}" && -f "${MODEL_MANIFEST}" ]]; then
   echo "[E1-main] Stage C: excess-FVD"
-  uv run --extra cu128 --group libero --python 3.10 \
+  uv run --no-sync --extra cu128 --group libero --python 3.10 \
     python cosmos_policy/experiments/robot/libero/e1_main_fvd.py \
       --model_manifest "${MODEL_MANIFEST}" \
       --gt_manifest "${GT_MANIFEST}" \
@@ -111,7 +111,7 @@ fi
 echo "[E1-main] Stage D: dissociation report"
 EXCESS_ARG=()
 [[ -f "${OUT}/excess_fvd.json" ]] && EXCESS_ARG=(--excess_fvd_json "${OUT}/excess_fvd.json")
-uv run --extra cu128 --group libero --python 3.10 \
+uv run --no-sync --extra cu128 --group libero --python 3.10 \
   python cosmos_policy/experiments/robot/libero/e1_main_report.py \
     --jsonl_files ${ACTION_JSONL_GLOB} \
     --task_classification "${TASK_CLASSIFICATION}" \
