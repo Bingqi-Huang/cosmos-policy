@@ -11,7 +11,9 @@
 # first-GPU-run items, hence this is a driver to run/validate on the 5090, not on the
 # training node. Read the inline NOTES before running.
 set -euo pipefail
-cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)"
+# Resolve the cosmos-policy repo root from THIS script's location (robust to the caller's
+# cwd; the project root is not a git repo, so git rev-parse there would mis-resolve paths).
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
 
 export MUJOCO_GL="${MUJOCO_GL:-egl}"          # GPU EGL offscreen render (GT replays)
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
