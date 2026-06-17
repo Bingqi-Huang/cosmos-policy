@@ -21,6 +21,11 @@ export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
 # Avoid the Xet download path (it hangs on large gated .pt files on fresh boxes); the
 # needed checkpoints resolve from the local HF cache. Matches bin/libero_local_env.sh.
 export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-1}"
+# Force offline HF resolution: the eval box may have NO internet, and otherwise hf_hub
+# does a network HEAD even for cached files and hangs/retries on "Network is unreachable".
+# All needed assets (base + LIBERO policy ckpts, tokenizer, dataset stats, t5) must be in
+# the local HF cache. Set HF_HUB_OFFLINE=0 to allow downloads on an online box.
+export HF_HUB_OFFLINE="${HF_HUB_OFFLINE:-1}"
 
 # ---- knobs ----------------------------------------------------------------
 SUITES="${SUITES:-libero_spatial libero_object libero_goal libero_10}"
