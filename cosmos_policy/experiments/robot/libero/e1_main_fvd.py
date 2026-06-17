@@ -66,6 +66,11 @@ def frechet_distance(feats_a: np.ndarray, feats_b: np.ndarray, eps: float = 1e-6
     feats_b = np.asarray(feats_b, dtype=np.float64)
     if feats_a.ndim != 2 or feats_b.ndim != 2:
         raise ValueError("feature sets must be 2-D [N, D]")
+    if feats_a.shape[0] < 2 or feats_b.shape[0] < 2:
+        # A Gaussian (and its covariance) is undefined for <2 samples per set. Checked
+        # before the dim-match assert so an empty/degenerate set returns NaN rather than
+        # tripping on the placeholder shape of an empty extractor result.
+        return float("nan")
     if feats_a.shape[1] != feats_b.shape[1]:
         raise ValueError("feature dimensions differ between the two sets")
 
@@ -182,6 +187,8 @@ class I3DFeatureExtractor:
         import torch
         import torch.nn.functional as F
 
+        if len(clips) == 0:
+            return np.zeros((0, 1), dtype=np.float64)  # frechet_distance guards on <2 rows
         self._ensure_model()
         feats: list[np.ndarray] = []
         with torch.no_grad():
@@ -290,6 +297,7 @@ def main() -> None:
     ap.add_argument("--nominal_cell", default="_nominal", help="cell key to treat as the nominal bin")
     ap.add_argument("--i3d_ckpt", default="", help="TorchScript I3D (else uses E1_I3D_CKPT)")
     ap.add_argument("--split_seed", type=int, default=0)
+    ap.add_argument("--min_clips", type=int, default=4, help="min GT clips per cell (>=4 for a 2/2 oracle split)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -312,23 +320,40 @@ def main() -> None:
 
     from cosmos_policy.experiments.robot.libero.e1_main_render_gt_futures import split_clip_ids
 
+    # FVD is a distributional metric: a cell needs enough clips for a stable covariance and a
+    # 2-way oracle split (>=2 per split). Cells below threshold are skipped, not crashed.
     out: dict[str, float] = {}
+    skipped: dict[str, str] = {}
     for ck in sorted(set(model_cells) & set(gt_cells)):
+        n_model, n_gt = len(model_cells[ck]), len(gt_cells[ck])
+        if n_model < 2 or n_gt < args.min_clips:
+            skipped[ck] = f"model={n_model}, gt={n_gt} (need model>=2, gt>={args.min_clips})"
+            continue
         gt_paths = gt_cells[ck]
         a_ids, b_ids = split_clip_ids(gt_paths, seed=args.split_seed)
-        bin_clips = BinClips(
-            model=load_clips(model_cells[ck]),
-            gt=load_clips(gt_paths),
-            gt_split_a=load_clips(a_ids),
-            gt_split_b=load_clips(b_ids),
-        )
-        out[ck] = excess_fvd(bin_clips, extractor)["excess_fvd"]
-        print(f"  {ck}: excess-FVD = {out[ck]:.3f}")
+        try:
+            bin_clips = BinClips(
+                model=load_clips(model_cells[ck]),
+                gt=load_clips(gt_paths),
+                gt_split_a=load_clips(a_ids),
+                gt_split_b=load_clips(b_ids),
+            )
+            val = excess_fvd(bin_clips, extractor)["excess_fvd"]
+        except Exception as exc:  # noqa: BLE001 - record + continue so one bad cell never aborts the run
+            skipped[ck] = f"error: {exc}"
+            continue
+        if val != val:  # NaN guard (degenerate covariance)
+            skipped[ck] = "excess-FVD is NaN (degenerate features)"
+            continue
+        out[ck] = val
+        print(f"  {ck}: excess-FVD = {val:.3f}  (model={n_model}, gt={n_gt})")
 
     if args.nominal_cell in out:
         out["_nominal"] = out[args.nominal_cell]
     Path(args.out).write_text(json.dumps(out, indent=2), encoding="utf-8")
-    print(f"excess-FVD per cell written: {args.out}")
+    print(f"excess-FVD: {len(out)} cells written, {len(skipped)} skipped -> {args.out}")
+    for ck, why in sorted(skipped.items()):
+        print(f"  [skip] {ck}: {why}")
 
 
 if __name__ == "__main__":
