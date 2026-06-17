@@ -86,7 +86,7 @@ else
         --num_denoising_steps_action 5 \
         --num_denoising_steps_future_state 1 \
         --num_denoising_steps_value 1 \
-        --ar_value_prediction False \
+        --ar_value_prediction True \
         --deterministic True \
         --randomize_seed False \
         --load_ema_to_reg "${LOAD_EMA_TO_REG}" \
