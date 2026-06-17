@@ -271,7 +271,9 @@ def main() -> None:
     g.add_argument("--log_files", nargs="+", help="Eval stdout log files to parse")
     p.add_argument(
         "--task_classification",
-        default="/nvme02/bingqi/Project/view-invariant_vla/code/LIBERO-plus/libero/libero/benchmark/task_classification.json",
+        default=str(
+            pathlib.Path("~/.cache/huggingface/hub/datasets--Sylvest--libero_plus_data_4suite/task_classification.json").expanduser()
+        ),
         help="Path to LIBERO-Plus task_classification.json",
     )
     p.add_argument("--output_dir", default="outputs/phase0/camera_report", help="Directory for output files")

@@ -152,9 +152,16 @@ def main() -> None:
             continue
         by_base.setdefault(parsed["base"], []).append({"name": name, **parsed})
 
+    # The LIBERO-Cosmos-Policy success_only suites are stored as "<suite>_regen" (re-rendered
+    # demos); the eval suite name passed in (e.g. libero_spatial) has no suffix. Resolve to
+    # whichever directory actually exists.
+    suite_dir = args.suite
+    if not (Path(args.libero_root) / suite_dir).is_dir() and (Path(args.libero_root) / f"{args.suite}_regen").is_dir():
+        suite_dir = f"{args.suite}_regen"
+
     bddl_root = default_bddl_root()
     for base, cams in tqdm(by_base.items(), desc="tasks"):
-        hdf5_path = Path(args.libero_root) / args.suite / f"{base}_demo.hdf5"
+        hdf5_path = Path(args.libero_root) / suite_dir / f"{base}_demo.hdf5"
         if not hdf5_path.exists():
             print(f"  skip (missing demo): {hdf5_path}")
             continue
