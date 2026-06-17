@@ -949,20 +949,25 @@ def run_camera_task(
                 show_diff=False,
             )
 
-        # E1-main: save predicted future frames as a clip for camera-conditioned excess-FVD.
-        # Independent of save_rollout_videos; one clip per episode, per-shard manifest.
+        # E1-main: save the model's predicted future-scene frames AND the state-matched GT
+        # (the rollout's own scenes at query cadence under the SAME perturbed camera) for
+        # camera-conditioned excess-FID. Independent of save_rollout_videos; per-shard manifest.
         if cfg.save_future_clips_dir and cfg.use_third_person_image:
-            from cosmos_policy.experiments.robot.libero.e1_main_fvd import save_model_future_clip
+            from cosmos_policy.experiments.robot.libero.e1_main_fid import save_episode_frames
             from cosmos_policy.experiments.robot.libero.generate_camera_report import _classify_condition
 
             os.makedirs(cfg.save_future_clips_dir, exist_ok=True)
-            save_model_future_clip(
+            gt_scene_frames = (
+                np.stack(replay_images[:: cfg.num_open_loop_steps], axis=0) if len(replay_images) > 0 else None
+            )
+            save_episode_frames(
                 [x["future_image"] for x in future_image_predictions_list],
+                gt_scene_frames,
                 name=camera_task_name,
                 condition=_classify_condition(camera_task_name),
                 out_dir=cfg.save_future_clips_dir,
                 manifest_path=os.path.join(
-                    cfg.save_future_clips_dir, f"model_futures_manifest_shard{cfg.shard_index}.jsonl"
+                    cfg.save_future_clips_dir, f"e1_frames_manifest_shard{cfg.shard_index}.jsonl"
                 ),
                 clip_id=f"{camera_task_name}__ep{total_episodes}",
             )

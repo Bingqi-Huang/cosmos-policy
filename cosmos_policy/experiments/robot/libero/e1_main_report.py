@@ -124,11 +124,27 @@ def evaluate_dissociation(
     nominal_excess_fvd: Optional[float],
     config: DissociationConfig,
     semantic_preserved_by_cell: Optional[dict[str, bool]] = None,
+    nominal_oracle: Optional[float] = None,
 ) -> DissociationResult:
-    """Apply the LD13 pre-registered dissociation criterion. Pure logic (CPU-testable)."""
+    """Apply the LD13 dissociation criterion (FID-adapted). Pure logic (CPU-testable).
+
+    Delta normalization: excess-FID can be <= 0 (the model can match GT as well as the
+    GT-vs-GT floor), so LD13's ratio over excess(nom) is ill-posed. When the nominal oracle
+    FID is supplied we use it (always > 0, the natural within-distribution FID scale) as the
+    Delta denominator: Delta(c) = (excess(c) - excess(nom)) / (oracle(nom) + eps). This
+    adaptation of the pre-registered formula is necessitated by the FVD->FID switch and is
+    recorded for researcher confirmation; falling back to the raw LD13 ratio is unsafe.
+    """
     result = DissociationResult(config=asdict(config), nominal_excess_fvd=nominal_excess_fvd)
     semantic_preserved_by_cell = semantic_preserved_by_cell or {}
     nominal_pp = config.nominal_success_rate * 100.0
+    denom = (nominal_oracle if (nominal_oracle is not None and nominal_oracle > 0) else None)
+    if denom is None and nominal_excess_fvd is not None:
+        result.notes.append(
+            "Delta denominator: nominal oracle FID not available; excess(nom)-normalized Delta "
+            "is unreliable when excess(nom) is near 0 or negative. Supply --nominal_manifest so "
+            "the FID stage records _nominal_oracle, or treat fidelity verdicts as provisional."
+        )
 
     band_fidelity_flags: list[bool] = []
     for key in sorted(action_cells, key=lambda k: (k.condition, k.level)):
@@ -141,9 +157,11 @@ def evaluate_dissociation(
         excess = excess_fvd_by_cell.get(kstr)
         rel_deg: Optional[float] = None
         fidelity_ok: Optional[bool] = None
-        if excess is not None and nominal_excess_fvd is not None:
-            rel_deg = (excess - nominal_excess_fvd) / (nominal_excess_fvd + config.eps)
+        if excess is not None and nominal_excess_fvd is not None and denom is not None:
+            rel_deg = (excess - nominal_excess_fvd) / (denom + config.eps)
             fidelity_ok = rel_deg <= config.rel_excess_fvd_threshold
+        # If denom is None (no positive nominal oracle) we leave rel_deg/fidelity unset rather
+        # than fabricate a verdict from an ill-posed ratio; the note above explains.
 
         sem_ok = semantic_preserved_by_cell.get(kstr)
 
@@ -203,12 +221,12 @@ def format_summary_md(result: DissociationResult) -> str:
     lines.append(
         f"- nominal action SR: {cfg['nominal_success_rate'] * 100:.1f}%  | "
         f"drop band >= {cfg['action_drop_threshold_pp']:.0f} pp  | "
-        f"rel excess-FVD threshold <= {cfg['rel_excess_fvd_threshold'] * 100:.0f}%  | "
+        f"rel excess-FID threshold <= {cfg['rel_excess_fvd_threshold'] * 100:.0f}%  | "
         f"min episodes/cell {cfg['min_episodes_per_cell']}"
     )
-    lines.append(f"- nominal excess-FVD: {result.nominal_excess_fvd}")
+    lines.append(f"- nominal excess-FID: {result.nominal_excess_fvd}")
     lines.append("")
-    lines.append("| cell | episodes | action SR | drop (pp) | band | excess-FVD | Δ(c) | fidelity ok | semantic ok |")
+    lines.append("| cell | episodes | action SR | drop (pp) | band | excess-FID | Δ(c) | fidelity ok | semantic ok |")
     lines.append("|---|---|---|---|---|---|---|---|---|")
     for c in result.cells:
         def fmt(v, p=""):
@@ -265,9 +283,11 @@ def main() -> None:
 
     excess_by_cell: dict[str, float] = {}
     nominal_excess = None
+    nominal_oracle = None
     if args.excess_fvd_json:
         raw = json.loads(Path(args.excess_fvd_json).read_text(encoding="utf-8"))
         nominal_excess = raw.pop("_nominal", None)
+        nominal_oracle = raw.pop("_nominal_oracle", None)  # positive FID-floor scale for Delta
         excess_by_cell = {str(k): float(v) for k, v in raw.items()}
 
     semantic_by_cell = None
@@ -275,7 +295,9 @@ def main() -> None:
         semantic_by_cell = {str(k): bool(v) for k, v in json.loads(Path(args.semantic_json).read_text()).items()}
 
     cfg = DissociationConfig(nominal_success_rate=args.nominal_success_rate)
-    result = evaluate_dissociation(action_cells, excess_by_cell, nominal_excess, cfg, semantic_by_cell)
+    result = evaluate_dissociation(
+        action_cells, excess_by_cell, nominal_excess, cfg, semantic_by_cell, nominal_oracle=nominal_oracle
+    )
     paths = write_report(result, args.out_dir)
     print(f"E1-main report written: {paths['summary']}")
 

@@ -6,11 +6,14 @@
 #                 Row-1 camera eval JSONLs — NO rerun needed).
 #   video side  : camera-conditioned excess-FVD of model-predicted futures vs GT replays.
 #
-# Prereqs on the eval box (see handoff "E1-main scaffold BUILT"): (1) the LIBERO-Plus
-# camera env installed + ~/.libero/config.yaml pointing at it (the venv stock `libero`
-# has no camera-view handling); (2) cosmos-policy/assets/fvd/i3d_torchscript.pt present;
-# (3) the frozen Row-1 checkpoint + LIBERO success_only dataset + HF cache for the base /
-# LIBERO policy checkpoints. The eval wiring and I3D default are already in code.
+# Method (researcher-decided 2026-06-17): the WAM emits a single predicted future-scene
+# frame per query, so the LD13 video-side metric is realised as camera-conditioned
+# excess-FID; GT is the rollout's OWN scenes under the same perturbed camera (state-matched,
+# no separate demo render). Stages: A perturbed rollouts / A-nom nominal rollouts (Delta
+# denominator) / C excess-FID / D dissociation report.
+# Prereqs on the eval box: (1) LIBERO-Plus camera env + ~/.libero/config.yaml (stock libero
+# has no camera-view handling); (2) cosmos-policy/assets/fid/inception_v3_imagenet.pth;
+# (3) frozen Row-1 checkpoint + LIBERO success_only dataset + HF cache for base/LIBERO ckpts.
 set -euo pipefail
 # Resolve the cosmos-policy repo root from THIS script's location (robust to the caller's
 # cwd; the project root is not a git repo, so git rev-parse there would mis-resolve paths).
@@ -38,9 +41,10 @@ CAMERA_TASKS_DIR="${CAMERA_TASKS_DIR:-outputs/phase0/libero_plus_camera_eval}"  
 ACTION_JSONL_GLOB="${ACTION_JSONL_GLOB:-outputs/phase1/scene_only_stable_eval/iter_000010000/camera_full/*/shards/*/per_task.jsonl}"
 TASK_CLASSIFICATION="${TASK_CLASSIFICATION:-$HOME/.cache/huggingface/hub/datasets--Sylvest--libero_plus_data_4suite/task_classification.json}"
 NOMINAL_SR="${NOMINAL_SR:-0.932}"             # frozen Row-1 full-ID success rate (action nominal)
-# I3D for FVD (stage C). Default to the in-repo asset so stage C is not silently skipped;
-# rsync the 49MB binary to cosmos-policy/assets/fvd/ (it is gitignored / untracked).
-I3D_CKPT="${I3D_CKPT:-${E1_I3D_CKPT:-assets/fvd/i3d_torchscript.pt}}"
+# Inception weights for excess-FID (stage C). Default to the in-repo asset; rsync the
+# 103MB file to cosmos-policy/assets/fid/ (untracked).
+INCEPTION_CKPT="${INCEPTION_CKPT:-${E1_INCEPTION_CKPT:-assets/fid/inception_v3_imagenet.pth}}"
+RUN_NOMINAL="${RUN_NOMINAL:-1}"               # also run a nominal-camera pass for the Delta denominator
 NUM_TRIALS="${NUM_TRIALS:-3}"
 LOAD_EMA_TO_REG="${LOAD_EMA_TO_REG:-True}"    # frozen Row-1 was EMA-enabled; eval with EMA weights
 OUT="${OUT:-outputs/phase1/e1_main}"
@@ -50,85 +54,73 @@ echo "[E1-main] ckpt=${CKPT_PATH}"
 [[ -d "${CKPT_PATH}" ]] || { echo "[ERROR] missing checkpoint ${CKPT_PATH}"; exit 1; }
 [[ -f "${TASK_CLASSIFICATION}" ]] || echo "[WARN] task_classification.json not found at ${TASK_CLASSIFICATION} (needed for the report's difficulty levels)"
 
-# ---- Stage A: model-predicted future rollouts (video side) ----------------
-# Wiring is committed: run_libero_eval.run_camera_task saves predicted future clips when
-# --save_future_clips_dir is set (independent of --save_rollout_videos), one clip/episode,
-# per-shard manifest. --ar_future_prediction True populates the future predictions. The
-# flags below are forwarded to each shard by run_libero_camera_parallel (parse_known_args).
-MODEL_CLIPS_DIR="${MODEL_CLIPS_DIR:-${OUT}/model_futures}"
-MODEL_MANIFEST="${MODEL_MANIFEST:-${OUT}/model_futures_manifest.jsonl}"
-if [[ -f "${MODEL_MANIFEST}" ]]; then
-  echo "[E1-main] Stage A: reusing existing ${MODEL_MANIFEST}"
+# Shared scene-only eval flags (mirror the frozen Row-1 camera eval). run_camera_task saves,
+# per episode, the model's predicted future-scene frames AND the state-matched GT (the
+# rollout's own scenes at query cadence under the same perturbed camera) -> per-shard
+# e1_frames_manifest_shard*.jsonl. Forwarded to each shard by parse_known_args.
+EVAL_FLAGS=(
+  --ckpt_path "${CKPT_PATH}" --config "${CONFIG}"
+  --dataset_stats_path "${DATASET_STATS}" --t5_text_embeddings_path "${T5_EMB}"
+  --use_wrist_image False --use_third_person_image True --use_proprio True
+  --normalize_proprio True --unnormalize_actions True --trained_with_image_aug True
+  --chunk_size 16 --num_open_loop_steps 16 --flip_images True --use_jpeg_compression True
+  --num_denoising_steps_action 5 --num_denoising_steps_future_state 1 --num_denoising_steps_value 1
+  --ar_value_prediction True --ar_future_prediction True --deterministic True --randomize_seed False
+  --load_ema_to_reg "${LOAD_EMA_TO_REG}" --save_rollout_videos False
+)
+
+run_rollouts() {  # $1=suite  $2=task_file  $3=frames_dir  $4=rollout_out_dir
+  uv run --no-sync --extra cu128 --group libero --python 3.10 \
+    python cosmos_policy/experiments/robot/libero/run_libero_camera_parallel.py \
+      --task_suite_name "$1" --camera_tasks_file "$2" \
+      --gpu_ids "${GPU_IDS}" --num_trials_per_task "${NUM_TRIALS}" \
+      --output_dir "$4" --save_future_clips_dir "$3" "${EVAL_FLAGS[@]}"
+}
+
+# ---- Stage A: perturbed-camera rollouts (model futures + state-matched GT) -
+MANIFEST="${OUT}/e1_frames_manifest.jsonl"
+if [[ -f "${MANIFEST}" ]]; then
+  echo "[E1-main] Stage A: reusing ${MANIFEST}"
 else
   for suite in ${SUITES}; do
-    echo "[E1-main] Stage A: model-future rollouts for ${suite}"
-    uv run --no-sync --extra cu128 --group libero --python 3.10 \
-      python cosmos_policy/experiments/robot/libero/run_libero_camera_parallel.py \
-        --task_suite_name "${suite}" \
-        --camera_tasks_file "${CAMERA_TASKS_DIR}/camera_task_names_${suite}.json" \
-        --gpu_ids "${GPU_IDS}" \
-        --num_trials_per_task "${NUM_TRIALS}" \
-        --output_dir "${OUT}/video_rollouts/${suite}" \
-        --ckpt_path "${CKPT_PATH}" \
-        --config "${CONFIG}" \
-        --dataset_stats_path "${DATASET_STATS}" \
-        --t5_text_embeddings_path "${T5_EMB}" \
-        --use_wrist_image False \
-        --use_third_person_image True \
-        --use_proprio True \
-        --normalize_proprio True \
-        --unnormalize_actions True \
-        --trained_with_image_aug True \
-        --chunk_size 16 \
-        --num_open_loop_steps 16 \
-        --flip_images True \
-        --use_jpeg_compression True \
-        --num_denoising_steps_action 5 \
-        --num_denoising_steps_future_state 1 \
-        --num_denoising_steps_value 1 \
-        --ar_value_prediction True \
-        --deterministic True \
-        --randomize_seed False \
-        --load_ema_to_reg "${LOAD_EMA_TO_REG}" \
-        --ar_future_prediction True \
-        --save_rollout_videos False \
-        --save_future_clips_dir "${MODEL_CLIPS_DIR}"
+    echo "[E1-main] Stage A: perturbed rollouts for ${suite}"
+    run_rollouts "${suite}" "${CAMERA_TASKS_DIR}/camera_task_names_${suite}.json" \
+      "${OUT}/frames_perturbed/${suite}" "${OUT}/rollouts/${suite}"
   done
-  cat "${MODEL_CLIPS_DIR}"/model_futures_manifest_shard*.jsonl > "${MODEL_MANIFEST}" 2>/dev/null || true
-  echo "[E1-main] Stage A done -> ${MODEL_MANIFEST}"
+  cat "${OUT}"/frames_perturbed/*/e1_frames_manifest_shard*.jsonl > "${MANIFEST}" 2>/dev/null || true
+  echo "[E1-main] Stage A done -> ${MANIFEST}"
 fi
 
-# ---- Stage B: GT-replay future clips at the benchmark eval cameras --------
-for suite in ${SUITES}; do
-  echo "[E1-main] Stage B: GT futures for ${suite}"
-  uv run --no-sync --extra cu128 --group libero --python 3.10 \
-    python cosmos_policy/experiments/robot/libero/e1_main_render_gt_futures.py \
-      --camera_tasks_file "${CAMERA_TASKS_DIR}/camera_task_names_${suite}.json" \
-      --suite "${suite}" \
-      --out_dir "${OUT}/gt_futures" \
-      --gpu_device_id "${GPU_IDS%%,*}"
-done
-GT_MANIFEST="${OUT}/gt_futures/gt_futures_manifest_combined.jsonl"
-cat "${OUT}"/gt_futures/gt_futures_manifest_*.jsonl > "${GT_MANIFEST}" 2>/dev/null || true
-
-# ---- Stage C: per-cell excess-FVD ----------------------------------------
-if [[ -n "${I3D_CKPT}" && -f "${MODEL_MANIFEST}" ]]; then
-  echo "[E1-main] Stage C: excess-FVD"
-  uv run --no-sync --extra cu128 --group libero --python 3.10 \
-    python cosmos_policy/experiments/robot/libero/e1_main_fvd.py \
-      --model_manifest "${MODEL_MANIFEST}" \
-      --gt_manifest "${GT_MANIFEST}" \
-      --task_classification "${TASK_CLASSIFICATION}" \
-      --i3d_ckpt "${I3D_CKPT}" \
-      --out "${OUT}/excess_fvd.json"
-else
-  echo "[E1-main] Stage C skipped: need I3D_CKPT and ${MODEL_MANIFEST}."
+# ---- Stage A-nom: nominal-camera rollouts (Delta denominator) --------------
+NOM_MANIFEST=""
+if [[ "${RUN_NOMINAL}" == "1" ]]; then
+  NOM_MANIFEST="${OUT}/e1_frames_manifest_nominal.jsonl"
+  if [[ ! -f "${NOM_MANIFEST}" ]]; then
+    for suite in ${SUITES}; do
+      nom_file="${OUT}/nominal_tasks/camera_task_names_${suite}.json"
+      mkdir -p "$(dirname "${nom_file}")"
+      uv run --no-sync --extra cu128 --group libero --python 3.10 \
+        python cosmos_policy/experiments/robot/libero/e1_main_make_nominal_tasks.py \
+          --camera_tasks_file "${CAMERA_TASKS_DIR}/camera_task_names_${suite}.json" --out "${nom_file}"
+      echo "[E1-main] Stage A-nom: nominal rollouts for ${suite}"
+      run_rollouts "${suite}" "${nom_file}" "${OUT}/frames_nominal/${suite}" "${OUT}/rollouts_nominal/${suite}"
+    done
+    cat "${OUT}"/frames_nominal/*/e1_frames_manifest_shard*.jsonl > "${NOM_MANIFEST}" 2>/dev/null || true
+  fi
 fi
+
+# ---- Stage C: per-cell excess-FID -----------------------------------------
+echo "[E1-main] Stage C: excess-FID"
+FID_ARGS=(--manifest "${MANIFEST}" --task_classification "${TASK_CLASSIFICATION}" --out "${OUT}/excess_fid.json")
+[[ -n "${INCEPTION_CKPT}" ]] && FID_ARGS+=(--inception_ckpt "${INCEPTION_CKPT}")
+[[ -n "${NOM_MANIFEST}" && -f "${NOM_MANIFEST}" ]] && FID_ARGS+=(--nominal_manifest "${NOM_MANIFEST}")
+uv run --no-sync --extra cu128 --group libero --python 3.10 \
+  python cosmos_policy/experiments/robot/libero/e1_main_fid.py "${FID_ARGS[@]}"
 
 # ---- Stage D: dissociation criterion + report ----------------------------
 echo "[E1-main] Stage D: dissociation report"
 EXCESS_ARG=()
-[[ -f "${OUT}/excess_fvd.json" ]] && EXCESS_ARG=(--excess_fvd_json "${OUT}/excess_fvd.json")
+[[ -f "${OUT}/excess_fid.json" ]] && EXCESS_ARG=(--excess_fvd_json "${OUT}/excess_fid.json")
 uv run --no-sync --extra cu128 --group libero --python 3.10 \
   python cosmos_policy/experiments/robot/libero/e1_main_report.py \
     --jsonl_files ${ACTION_JSONL_GLOB} \
