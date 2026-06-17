@@ -42,6 +42,7 @@ NOMINAL_SR="${NOMINAL_SR:-0.932}"             # frozen Row-1 full-ID success rat
 # rsync the 49MB binary to cosmos-policy/assets/fvd/ (it is gitignored / untracked).
 I3D_CKPT="${I3D_CKPT:-${E1_I3D_CKPT:-assets/fvd/i3d_torchscript.pt}}"
 NUM_TRIALS="${NUM_TRIALS:-3}"
+LOAD_EMA_TO_REG="${LOAD_EMA_TO_REG:-True}"    # frozen Row-1 was EMA-enabled; eval with EMA weights
 OUT="${OUT:-outputs/phase1/e1_main}"
 mkdir -p "${OUT}"
 
@@ -72,6 +73,23 @@ else
         --config "${CONFIG}" \
         --dataset_stats_path "${DATASET_STATS}" \
         --t5_text_embeddings_path "${T5_EMB}" \
+        --use_wrist_image False \
+        --use_third_person_image True \
+        --use_proprio True \
+        --normalize_proprio True \
+        --unnormalize_actions True \
+        --trained_with_image_aug True \
+        --chunk_size 16 \
+        --num_open_loop_steps 16 \
+        --flip_images True \
+        --use_jpeg_compression True \
+        --num_denoising_steps_action 5 \
+        --num_denoising_steps_future_state 1 \
+        --num_denoising_steps_value 1 \
+        --ar_value_prediction False \
+        --deterministic True \
+        --randomize_seed False \
+        --load_ema_to_reg "${LOAD_EMA_TO_REG}" \
         --ar_future_prediction True \
         --save_rollout_videos False \
         --save_future_clips_dir "${MODEL_CLIPS_DIR}"
