@@ -279,16 +279,36 @@ def main() -> None:
 
     records = _load_records(args.jsonl_files)
     task_cls = load_task_classification(args.task_classification)
-    action_cells = aggregate_action_cells(records, task_cls)
 
     excess_by_cell: dict[str, float] = {}
     nominal_excess = None
     nominal_oracle = None
+    measured_tasks = None
     if args.excess_fvd_json:
         raw = json.loads(Path(args.excess_fvd_json).read_text(encoding="utf-8"))
         nominal_excess = raw.pop("_nominal", None)
         nominal_oracle = raw.pop("_nominal_oracle", None)  # positive FID-floor scale for Delta
+        measured_tasks = raw.pop("_measured_tasks", None)  # video-side task universe (subset-safe)
         excess_by_cell = {str(k): float(v) for k, v in raw.items()}
+
+    coverage_note = None
+    if measured_tasks:
+        # Restrict the action side to the SAME tasks the video side measured, so a subset/smoke
+        # run does not pair full-universe action SR against subset video FID (the two sides must
+        # cover the same tasks for the per-cell dissociation comparison to be meaningful).
+        measured = set(measured_tasks)
+        n_before = len({r.get("task_name") for r in records})
+        records = [r for r in records if r.get("task_name") in measured]
+        n_after = len({r.get("task_name") for r in records})
+        if n_after < n_before:
+            coverage_note = (
+                f"PARTIAL/SMOKE COVERAGE: action side restricted to the {n_after} task(s) the "
+                f"video side measured (of {n_before} in the action JSONL). This is expected for "
+                f"subset runs; the dissociation verdict is NOT authoritative until the full "
+                f"camera track is measured on both sides."
+            )
+
+    action_cells = aggregate_action_cells(records, task_cls)
 
     semantic_by_cell = None
     if args.semantic_json:
@@ -298,6 +318,8 @@ def main() -> None:
     result = evaluate_dissociation(
         action_cells, excess_by_cell, nominal_excess, cfg, semantic_by_cell, nominal_oracle=nominal_oracle
     )
+    if coverage_note:
+        result.notes.insert(0, coverage_note)
     paths = write_report(result, args.out_dir)
     print(f"E1-main report written: {paths['summary']}")
 

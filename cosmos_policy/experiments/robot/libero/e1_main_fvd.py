@@ -74,17 +74,26 @@ def frechet_distance(feats_a: np.ndarray, feats_b: np.ndarray, eps: float = 1e-6
     if feats_a.shape[1] != feats_b.shape[1]:
         raise ValueError("feature dimensions differ between the two sets")
 
+    # NOTE: the live E1-main metric is excess-FID in e1_main_fid.frechet_distance (canonical
+    # scipy product-sqrtm). This FVD path is superseded; its Frechet uses the SAME canonical
+    # recipe below so no incorrect matrix-sqrt math remains in the repo. (The old symmetrised
+    # eigendecomposition of cov_a@cov_b was mathematically wrong: a product of two symmetric
+    # PSD matrices need not be symmetric, so eigh of its symmetrisation != sqrtm of the product.)
+    from scipy import linalg
+
     mu_a, mu_b = feats_a.mean(axis=0), feats_b.mean(axis=0)
     # rowvar=False -> variables are columns (feature dims); needs N>=2 per set.
-    cov_a = np.cov(feats_a, rowvar=False)
-    cov_b = np.cov(feats_b, rowvar=False)
-    cov_a = np.atleast_2d(cov_a)
-    cov_b = np.atleast_2d(cov_b)
-
+    cov_a = np.atleast_2d(np.cov(feats_a, rowvar=False))
+    cov_b = np.atleast_2d(np.cov(feats_b, rowvar=False))
     diff = mu_a - mu_b
-    offset = np.eye(cov_a.shape[0]) * eps
-    covmean = _matrix_sqrt((cov_a + offset) @ (cov_b + offset))
-    fd = float(diff @ diff + np.trace(cov_a + cov_b - 2.0 * covmean))
+
+    covmean, _ = linalg.sqrtm(cov_a @ cov_b, disp=False)
+    if not np.isfinite(covmean).all():
+        offset = np.eye(cov_a.shape[0]) * eps
+        covmean = linalg.sqrtm((cov_a + offset) @ (cov_b + offset))
+    if np.iscomplexobj(covmean):
+        covmean = covmean.real
+    fd = float(diff @ diff + np.trace(cov_a) + np.trace(cov_b) - 2.0 * np.trace(covmean))
     # Numerical guard: FD is non-negative by construction.
     return max(fd, 0.0)
 

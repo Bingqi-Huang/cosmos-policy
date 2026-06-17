@@ -32,7 +32,50 @@ from typing import Optional, Sequence
 
 import numpy as np
 
-from cosmos_policy.experiments.robot.libero.e1_main_fvd import frechet_distance, relative_degradation
+from cosmos_policy.experiments.robot.libero.e1_main_fvd import relative_degradation
+
+
+def frechet_distance(feats_a: np.ndarray, feats_b: np.ndarray, eps: float = 1e-6) -> float:
+    """Canonical Frechet distance between two Gaussians fit to feature sets [N, D].
+
+        FD = ||mu_a - mu_b||^2 + Tr(Cov_a + Cov_b - 2*(Cov_a Cov_b)^{1/2}).
+
+    The matrix square root is computed with scipy.linalg.sqrtm on the (generally NON-symmetric)
+    product Cov_a @ Cov_b, exactly as in the reference FID implementation (pytorch-fid / TTUR).
+    A naive eigendecomposition of a symmetrised product is mathematically wrong because the
+    product of two symmetric PSD matrices need not be symmetric, so it is NOT used here.
+    """
+    from scipy import linalg
+
+    feats_a = np.asarray(feats_a, dtype=np.float64)
+    feats_b = np.asarray(feats_b, dtype=np.float64)
+    if feats_a.ndim != 2 or feats_b.ndim != 2:
+        raise ValueError("feature sets must be 2-D [N, D]")
+    if feats_a.shape[0] < 2 or feats_b.shape[0] < 2:
+        # A Gaussian covariance is undefined for <2 samples; return NaN rather than fabricate.
+        return float("nan")
+    if feats_a.shape[1] != feats_b.shape[1]:
+        raise ValueError("feature dimensions differ between the two sets")
+
+    mu_a, mu_b = feats_a.mean(axis=0), feats_b.mean(axis=0)
+    cov_a = np.atleast_2d(np.cov(feats_a, rowvar=False))
+    cov_b = np.atleast_2d(np.cov(feats_b, rowvar=False))
+    diff = mu_a - mu_b
+
+    # Product matrix square root (reference FID recipe), with a PSD offset retry if singular.
+    covmean, _ = linalg.sqrtm(cov_a @ cov_b, disp=False)
+    if not np.isfinite(covmean).all():
+        offset = np.eye(cov_a.shape[0]) * eps
+        covmean = linalg.sqrtm((cov_a + offset) @ (cov_b + offset))
+    if np.iscomplexobj(covmean):
+        # sqrtm of a real matrix can carry a tiny imaginary residue; assert it is numerical.
+        if not np.allclose(np.diagonal(covmean).imag, 0, atol=1e-3):
+            raise ValueError(f"FID sqrtm imaginary component too large: {np.max(np.abs(covmean.imag))}")
+        covmean = covmean.real
+
+    fd = float(diff @ diff + np.trace(cov_a) + np.trace(cov_b) - 2.0 * np.trace(covmean))
+    return max(fd, 0.0)  # FD is non-negative by construction; clamp numerical undershoot.
+
 
 # Frames are [H, W, 3] uint8 (or float). A frame-set is an array [N, H, W, 3] or a list of them.
 _DEFAULT_INCEPTION = os.path.join(
@@ -114,9 +157,10 @@ def save_episode_frames(
     """Persist one rollout episode's model future-frame set + state-matched GT scene set.
 
     Drop-in hook for run_camera_task. ``model_future_frames`` are the per-query predicted
-    future scenes (cosmos future_image); ``gt_scene_frames`` are the rollout's OWN scene
-    observations at query cadence under the SAME perturbed camera (replay_images[::chunk])
-    — the realised future, state/camera-matched to the predictions, no separate render.
+    future scenes (cosmos future_image); ``gt_scene_frames`` are the rollout's OWN realised-
+    future scene observations under the SAME perturbed camera, already temporally aligned by
+    the caller (prediction k <-> replay_images[(k+1)*stride]) — the realised future, state/
+    camera-matched to the predictions, no separate render.
     Manifest rows: {name, condition, model_path, gt_path}. Returns the model path or None.
     """
     model = [np.asarray(f) for f in model_future_frames if f is not None]
@@ -261,6 +305,19 @@ def main() -> None:
         if "_nominal" in nom:
             mf, gf = nom["_nominal"]
             score("_nominal", mf, gf, is_nominal=True)
+
+    # Record the perturbed tasks the video side actually saw (those with a valid cell key).
+    # The report restricts the action-side SR to this same task universe, so action and video
+    # are always measured on the SAME tasks — critical for subset/smoke runs (where the frozen
+    # action JSONL covers all 1599 tasks but the video manifest covers only a subset). On a
+    # full run this is the complete set, so the restriction is a no-op.
+    out["_measured_tasks"] = sorted(
+        {
+            row["name"]
+            for row in _load_manifest(args.manifest)
+            if _cell_key_for(row["name"], row.get("condition"), task_cls) is not None
+        }
+    )
 
     Path(args.out).write_text(json.dumps(out, indent=2), encoding="utf-8")
     print(f"excess-FID: {len(out)} cells written, {len(skipped)} skipped -> {args.out}")

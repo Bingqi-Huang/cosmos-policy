@@ -957,20 +957,32 @@ def run_camera_task(
             from cosmos_policy.experiments.robot.libero.generate_camera_report import _classify_condition
 
             os.makedirs(cfg.save_future_clips_dir, exist_ok=True)
-            gt_scene_frames = (
-                np.stack(replay_images[:: cfg.num_open_loop_steps], axis=0) if len(replay_images) > 0 else None
-            )
-            save_episode_frames(
-                [x["future_image"] for x in future_image_predictions_list],
-                gt_scene_frames,
-                name=camera_task_name,
-                condition=_classify_condition(camera_task_name),
-                out_dir=cfg.save_future_clips_dir,
-                manifest_path=os.path.join(
-                    cfg.save_future_clips_dir, f"e1_frames_manifest_shard{cfg.shard_index}.jsonl"
-                ),
-                clip_id=f"{camera_task_name}__ep{total_episodes}",
-            )
+            # Temporal alignment (correctness-critical): the model is requeried every
+            # num_open_loop_steps, so prediction k is made at replay_images[k*stride] (the
+            # CONDITIONING frame) and predicts the scene AFTER executing that action chunk,
+            # i.e. the realised scene at ~replay_images[(k+1)*stride]. The state-matched GT
+            # future is therefore replay_images[stride::stride] (shifted forward by one
+            # chunk), NOT replay_images[::stride] (which would be the current-state frames and
+            # compare "predicted future" against "current state" — the wrong distribution).
+            # The trailing prediction(s) whose future was never realised (episode ended early)
+            # are dropped by truncating both sides to the common length.
+            stride = cfg.num_open_loop_steps
+            model_future = [x["future_image"] for x in future_image_predictions_list]
+            realized_future = replay_images[stride::stride] if len(replay_images) > stride else []
+            n_pairs = min(len(model_future), len(realized_future))
+            if n_pairs > 0:
+                gt_scene_frames = np.stack(realized_future[:n_pairs], axis=0)
+                save_episode_frames(
+                    model_future[:n_pairs],
+                    gt_scene_frames,
+                    name=camera_task_name,
+                    condition=_classify_condition(camera_task_name),
+                    out_dir=cfg.save_future_clips_dir,
+                    manifest_path=os.path.join(
+                        cfg.save_future_clips_dir, f"e1_frames_manifest_shard{cfg.shard_index}.jsonl"
+                    ),
+                    clip_id=f"{camera_task_name}__ep{total_episodes}",
+                )
 
         log_message(f"Success: {success}", log_file)
         log_message(f"# episodes completed so far: {total_episodes}", log_file)

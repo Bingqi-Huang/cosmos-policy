@@ -79,23 +79,30 @@ run_rollouts() {  # $1=suite  $2=task_file  $3=frames_dir  $4=rollout_out_dir
 
 # ---- Stage A: perturbed-camera rollouts (model futures + state-matched GT) -
 MANIFEST="${OUT}/e1_frames_manifest.jsonl"
-if [[ -f "${MANIFEST}" ]]; then
-  echo "[E1-main] Stage A: reusing ${MANIFEST}"
+if [[ -s "${MANIFEST}" ]]; then   # -s: reuse only a NON-EMPTY manifest (an empty one is a failed run)
+  echo "[E1-main] Stage A: reusing ${MANIFEST} ($(wc -l < "${MANIFEST}") rows)"
 else
   for suite in ${SUITES}; do
     echo "[E1-main] Stage A: perturbed rollouts for ${suite}"
     run_rollouts "${suite}" "${CAMERA_TASKS_DIR}/camera_task_names_${suite}.json" \
       "${OUT}/frames_perturbed/${suite}" "${OUT}/rollouts/${suite}"
   done
-  cat "${OUT}"/frames_perturbed/*/e1_frames_manifest_shard*.jsonl > "${MANIFEST}" 2>/dev/null || true
-  echo "[E1-main] Stage A done -> ${MANIFEST}"
+  # Concatenate per-shard manifests. Use find (not a glob) so a missing match is an empty file,
+  # not a literal-glob row; then ASSERT non-empty so a silent capture failure aborts loudly.
+  find "${OUT}/frames_perturbed" -name 'e1_frames_manifest_shard*.jsonl' -exec cat {} + > "${MANIFEST}" 2>/dev/null || true
+  if [[ ! -s "${MANIFEST}" ]]; then
+    echo "[ERROR] Stage A produced an EMPTY frames manifest (${MANIFEST}). No model/GT frame"
+    echo "        pairs were saved — check that rollouts ran and use_third_person_image=True."
+    exit 1
+  fi
+  echo "[E1-main] Stage A done -> ${MANIFEST} ($(wc -l < "${MANIFEST}") rows)"
 fi
 
 # ---- Stage A-nom: nominal-camera rollouts (Delta denominator) --------------
 NOM_MANIFEST=""
 if [[ "${RUN_NOMINAL}" == "1" ]]; then
   NOM_MANIFEST="${OUT}/e1_frames_manifest_nominal.jsonl"
-  if [[ ! -f "${NOM_MANIFEST}" ]]; then
+  if [[ ! -s "${NOM_MANIFEST}" ]]; then   # regenerate unless a NON-EMPTY nominal manifest exists
     for suite in ${SUITES}; do
       nom_file="${OUT}/nominal_tasks/camera_task_names_${suite}.json"
       mkdir -p "$(dirname "${nom_file}")"
@@ -105,7 +112,11 @@ if [[ "${RUN_NOMINAL}" == "1" ]]; then
       echo "[E1-main] Stage A-nom: nominal rollouts for ${suite}"
       run_rollouts "${suite}" "${nom_file}" "${OUT}/frames_nominal/${suite}" "${OUT}/rollouts_nominal/${suite}"
     done
-    cat "${OUT}"/frames_nominal/*/e1_frames_manifest_shard*.jsonl > "${NOM_MANIFEST}" 2>/dev/null || true
+    find "${OUT}/frames_nominal" -name 'e1_frames_manifest_shard*.jsonl' -exec cat {} + > "${NOM_MANIFEST}" 2>/dev/null || true
+    if [[ ! -s "${NOM_MANIFEST}" ]]; then
+      echo "[WARN] Stage A-nom produced an EMPTY nominal manifest — Delta will have no positive"
+      echo "       oracle denominator; the report will mark fidelity verdicts provisional."
+    fi
   fi
 fi
 
