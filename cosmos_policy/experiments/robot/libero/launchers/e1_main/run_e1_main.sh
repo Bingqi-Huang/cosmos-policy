@@ -6,10 +6,11 @@
 #                 Row-1 camera eval JSONLs — NO rerun needed).
 #   video side  : camera-conditioned excess-FVD of model-predicted futures vs GT replays.
 #
-# Stages B/C/D below are the NEW work. Stage A (model-future rollouts) needs the one-line
-# eval wiring documented in handoff ("E1-main wiring") and the I3D checkpoint; both are
-# first-GPU-run items, hence this is a driver to run/validate on the 5090, not on the
-# training node. Read the inline NOTES before running.
+# Prereqs on the eval box (see handoff "E1-main scaffold BUILT"): (1) the LIBERO-Plus
+# camera env installed + ~/.libero/config.yaml pointing at it (the venv stock `libero`
+# has no camera-view handling); (2) cosmos-policy/assets/fvd/i3d_torchscript.pt present;
+# (3) the frozen Row-1 checkpoint + LIBERO success_only dataset + HF cache for the base /
+# LIBERO policy checkpoints. The eval wiring and I3D default are already in code.
 set -euo pipefail
 # Resolve the cosmos-policy repo root from THIS script's location (robust to the caller's
 # cwd; the project root is not a git repo, so git rev-parse there would mis-resolve paths).
@@ -17,6 +18,9 @@ cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
 
 export MUJOCO_GL="${MUJOCO_GL:-egl}"          # GPU EGL offscreen render (GT replays)
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
+# Avoid the Xet download path (it hangs on large gated .pt files on fresh boxes); the
+# needed checkpoints resolve from the local HF cache. Matches bin/libero_local_env.sh.
+export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-1}"
 
 # ---- knobs ----------------------------------------------------------------
 SUITES="${SUITES:-libero_spatial libero_object libero_goal libero_10}"
@@ -29,7 +33,9 @@ CAMERA_TASKS_DIR="${CAMERA_TASKS_DIR:-outputs/phase0/libero_plus_camera_eval}"  
 ACTION_JSONL_GLOB="${ACTION_JSONL_GLOB:-outputs/phase1/scene_only_stable_eval/iter_000010000/camera_full/*/shards/*/per_task.jsonl}"
 TASK_CLASSIFICATION="${TASK_CLASSIFICATION:-$HOME/.cache/huggingface/hub/datasets--Sylvest--libero_plus_data_4suite/task_classification.json}"
 NOMINAL_SR="${NOMINAL_SR:-0.932}"             # frozen Row-1 full-ID success rate (action nominal)
-I3D_CKPT="${I3D_CKPT:-${E1_I3D_CKPT:-}}"      # TorchScript I3D for FVD (REQUIRED for stage C)
+# I3D for FVD (stage C). Default to the in-repo asset so stage C is not silently skipped;
+# rsync the 49MB binary to cosmos-policy/assets/fvd/ (it is gitignored / untracked).
+I3D_CKPT="${I3D_CKPT:-${E1_I3D_CKPT:-assets/fvd/i3d_torchscript.pt}}"
 NUM_TRIALS="${NUM_TRIALS:-3}"
 OUT="${OUT:-outputs/phase1/e1_main}"
 mkdir -p "${OUT}"

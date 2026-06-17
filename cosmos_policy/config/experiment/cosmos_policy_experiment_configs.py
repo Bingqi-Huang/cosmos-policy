@@ -594,10 +594,13 @@ cosmos_predict2_2b_480p_aloha_185_demos_4_tasks_mixture_foldshirt15_candiesinbow
             "_self_",
         ],
         checkpoint=dict(
-            # Resume from 50K checkpoint of base Cosmos Policy run
-            load_path=get_checkpoint_path(
-                "hf://nvidia/Cosmos-Policy-ALOHA-Predict2-2B/Cosmos-Policy-ALOHA-Predict2-2B.pt"
-            ),
+            # Resume from 50K checkpoint of base Cosmos Policy run.
+            # Keep this UNRESOLVED at module-import time: this file registers every
+            # experiment, so eager get_checkpoint_path() here downloads the unrelated
+            # ALOHA checkpoint even for LIBERO-only evals (it blocks E1 on a fresh box
+            # that has the LIBERO assets but not ALOHA). It is resolved when actually
+            # loaded; LIBERO configs never touch it.
+            load_path="hf://nvidia/Cosmos-Policy-ALOHA-Predict2-2B/Cosmos-Policy-ALOHA-Predict2-2B.pt",
         ),
         scheduler=dict(
             # LR decay for 15K steps in cycle #1, then decay by 5x and stay constant forever in cycle #2
