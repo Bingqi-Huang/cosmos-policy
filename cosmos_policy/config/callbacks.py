@@ -89,6 +89,16 @@ class WandbCallback(WandBCallbackImage):
         self.train_world_model_sample_value_l1_loss_log = _LossRecordNoEDM()
         self.train_value_function_sample_value_mse_loss_log = _LossRecordNoEDM()
         self.train_value_function_sample_value_l1_loss_log = _LossRecordNoEDM()
+        # SCVC-specific train metrics (only populated by SCVCPolicyVideo2WorldModel; the
+        # generic FM model never emits these keys, so the accumulators stay empty for
+        # baseline/non-SCVC runs and contribute nothing to the logged dict).
+        self.train_scvc_fm_loss_log = _LossRecordNoEDM()
+        self.train_scvc_cv_loss_log = _LossRecordNoEDM()
+        self.train_scvc_lambda_cv_log = _LossRecordNoEDM()
+        self.train_scvc_covariant_ratio_log = _LossRecordNoEDM()
+        # Toggled on the first SCVC step (identically across ranks, since every rank sees the
+        # same output_batch keys); gates both the collective get_stat() and the rank0 emit.
+        self._has_scvc_metrics = False
         self.train_img_unstable_count = torch.zeros(1, device="cuda")
         self.train_video_unstable_count = torch.zeros(1, device="cuda")
 
@@ -265,6 +275,28 @@ class WandbCallback(WandBCallbackImage):
                 self.train_value_function_sample_value_l1_loss_log.loss += value_function_sample_value_l1_loss
                 self.train_value_function_sample_value_l1_loss_log.iter_count += 1
 
+            # SCVC monitoring metrics (FM/CV unscaled losses, the warmup-scheduled lambda,
+            # and the per-step covariant future-image shrinkage ratio). Only present when an
+            # SCVCPolicyVideo2WorldModel produced output_batch; guarded so baseline runs skip.
+            if "scvc_fm_loss_unscaled" in output_batch:
+                self._has_scvc_metrics = True
+                scvc_fm_loss = output_batch["scvc_fm_loss_unscaled"].detach().float()
+                if not torch.isnan(scvc_fm_loss):
+                    self.train_scvc_fm_loss_log.loss += scvc_fm_loss
+                    self.train_scvc_fm_loss_log.iter_count += 1
+                scvc_cv_loss = output_batch["scvc_cv_loss_unscaled"].detach().float()
+                if not torch.isnan(scvc_cv_loss):
+                    self.train_scvc_cv_loss_log.loss += scvc_cv_loss
+                    self.train_scvc_cv_loss_log.iter_count += 1
+                scvc_lambda_cv = output_batch["scvc_lambda_cv"].detach().float()
+                if not torch.isnan(scvc_lambda_cv):
+                    self.train_scvc_lambda_cv_log.loss += scvc_lambda_cv
+                    self.train_scvc_lambda_cv_log.iter_count += 1
+                scvc_covariant_ratio = output_batch["scvc_covariant_future_image_ratio"].detach().float()
+                if not torch.isnan(scvc_covariant_ratio):
+                    self.train_scvc_covariant_ratio_log.loss += scvc_covariant_ratio
+                    self.train_scvc_covariant_ratio_log.iter_count += 1
+
         else:
             if model.is_image_batch(data_batch):
                 self.train_img_unstable_count += 1
@@ -315,6 +347,14 @@ class WandbCallback(WandBCallbackImage):
             avg_value_function_sample_value_mse_loss = self.train_value_function_sample_value_mse_loss_log.get_stat()
             avg_value_function_sample_value_l1_loss = self.train_value_function_sample_value_l1_loss_log.get_stat()
 
+            # SCVC stats reduce collectively (all ranks must call get_stat together); only an
+            # SCVC run reaches this branch with populated accumulators.
+            if self._has_scvc_metrics:
+                avg_scvc_fm_loss = self.train_scvc_fm_loss_log.get_stat()
+                avg_scvc_cv_loss = self.train_scvc_cv_loss_log.get_stat()
+                avg_scvc_lambda_cv = self.train_scvc_lambda_cv_log.get_stat()
+                avg_scvc_covariant_ratio = self.train_scvc_covariant_ratio_log.get_stat()
+
             dist.all_reduce(self.train_img_unstable_count, op=dist.ReduceOp.SUM)
             dist.all_reduce(self.train_video_unstable_count, op=dist.ReduceOp.SUM)
 
@@ -354,6 +394,15 @@ class WandbCallback(WandBCallbackImage):
                         "sample_counter": getattr(self.trainer, "sample_counter", iteration),
                     }
                 )
+                if self._has_scvc_metrics:
+                    info.update(
+                        {
+                            f"train{self.wandb_extra_tag}/scvc_fm_loss_unscaled": avg_scvc_fm_loss,
+                            f"train{self.wandb_extra_tag}/scvc_cv_loss_unscaled": avg_scvc_cv_loss,
+                            f"train{self.wandb_extra_tag}/scvc_lambda_cv": avg_scvc_lambda_cv,
+                            f"train{self.wandb_extra_tag}/scvc_covariant_future_image_ratio": avg_scvc_covariant_ratio,
+                        }
+                    )
                 if self.save_s3:
                     if (
                         iteration
