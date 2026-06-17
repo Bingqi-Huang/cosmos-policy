@@ -101,9 +101,12 @@ def _render_gt_future_clip(
         end_vert=params["end_vert"],
     )
     n_steps = len(states)
+    # Render the demo's natural future evolution at chunk cadence (stride), stopping at the
+    # end of the demo rather than padding with duplicates. ``n_frames`` is a max cap so the
+    # GT clip length tracks the model's per-query predicted-future sequence (one frame/chunk).
+    indices = list(range(t0, n_steps, max(1, stride)))[:n_frames]
     frames = []
-    for i in range(n_frames):
-        idx = min(t0 + i * stride, n_steps - 1)
+    for idx in indices:
         env.sim.set_state_from_flattened(states[idx])
         env.sim.forward()
         raw = _render(env, cam_id, pert_pos, pert_quat, img_size)
@@ -131,10 +134,10 @@ def main() -> None:
     ap.add_argument("--suite", required=True, help="suite dir name, e.g. libero_spatial")
     ap.add_argument("--out_dir", default=str(REPO_ROOT / "outputs" / "phase1" / "e1_main" / "gt_futures"))
     ap.add_argument("--img_size", type=int, default=224)
-    ap.add_argument("--n_frames", type=int, default=16)
-    ap.add_argument("--stride", type=int, default=1)
+    ap.add_argument("--n_frames", type=int, default=32, help="max GT clip length (cap)")
+    ap.add_argument("--stride", type=int, default=16, help="state stride = policy chunk cadence (num_open_loop_steps)")
     ap.add_argument("--gpu_device_id", type=int, default=0)
-    ap.add_argument("--t0", type=int, default=0, help="start state index for the GT future window")
+    ap.add_argument("--t0", type=int, default=16, help="start state index (~first future target, t+chunk)")
     args = ap.parse_args()
 
     names = json.loads(Path(args.camera_tasks_file).read_text(encoding="utf-8"))

@@ -194,12 +194,15 @@ def save_model_future_clip(
     condition: Optional[str],
     out_dir: str,
     manifest_path: str,
+    clip_id: Optional[str] = None,
 ) -> Optional[str]:
     """Persist one episode's predicted future frames as a clip + append a manifest row.
 
-    Drop-in hook for the camera eval: call this right after the future-prediction video is
-    saved in run_libero_eval (see handoff "E1-main wiring"). Returns the clip path, or None
-    when the episode produced no usable future frames. Manifest rows match the format
+    Drop-in hook for the camera eval: called right after the future-prediction video save
+    in run_libero_eval.run_camera_task. ``name`` is the camera task name (used for the
+    report's cell classification); ``clip_id`` makes the on-disk path unique per episode
+    (multiple trials per camera task) — defaults to ``name``. Returns the clip path, or
+    None when the episode produced no usable future frames. Manifest rows match the format
     e1_main_fvd.main / e1_main_render_gt_futures emit: {name, condition, clip_path}.
     """
     import json
@@ -209,7 +212,7 @@ def save_model_future_clip(
     if not frames:
         return None
     clip = np.stack(frames, axis=0).astype(np.uint8)  # [T, H, W, 3]
-    safe = name.replace("/", "_")
+    safe = (clip_id or name).replace("/", "_")
     clip_dir = Path(out_dir) / (condition or "nominal") / safe
     clip_dir.mkdir(parents=True, exist_ok=True)
     clip_path = clip_dir / "clip.npy"

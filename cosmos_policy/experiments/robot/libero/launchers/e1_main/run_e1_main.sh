@@ -37,15 +37,34 @@ echo "[E1-main] ckpt=${CKPT_PATH}"
 [[ -f "${TASK_CLASSIFICATION}" ]] || echo "[WARN] task_classification.json not found at ${TASK_CLASSIFICATION} (needed for the report's difficulty levels)"
 
 # ---- Stage A: model-predicted future rollouts (video side) ----------------
-# NOTE (first-GPU-run wiring): run_libero_eval must save predicted future clips. Wire
-# e1_main_fvd.save_model_future_clip(...) into run_libero_eval right after the future
-# video save (~line 794), guarded by a --save_future_clips_dir flag, keyed by the current
-# camera task name, and run with --ar_future_prediction True. See handoff "E1-main wiring".
-# Until wired, Stage A is a no-op stub and you must supply MODEL_MANIFEST manually.
+# Wiring is committed: run_libero_eval.run_camera_task saves predicted future clips when
+# --save_future_clips_dir is set (independent of --save_rollout_videos), one clip/episode,
+# per-shard manifest. --ar_future_prediction True populates the future predictions. The
+# flags below are forwarded to each shard by run_libero_camera_parallel (parse_known_args).
+MODEL_CLIPS_DIR="${MODEL_CLIPS_DIR:-${OUT}/model_futures}"
 MODEL_MANIFEST="${MODEL_MANIFEST:-${OUT}/model_futures_manifest.jsonl}"
-echo "[E1-main] Stage A: ensure ${MODEL_MANIFEST} exists (model-predicted future clips)."
-if [[ ! -f "${MODEL_MANIFEST}" ]]; then
-  echo "[E1-main] Stage A NOT wired yet — see handoff 'E1-main wiring'. Skipping."
+if [[ -f "${MODEL_MANIFEST}" ]]; then
+  echo "[E1-main] Stage A: reusing existing ${MODEL_MANIFEST}"
+else
+  for suite in ${SUITES}; do
+    echo "[E1-main] Stage A: model-future rollouts for ${suite}"
+    uv run --extra cu128 --group libero --python 3.10 \
+      python cosmos_policy/experiments/robot/libero/run_libero_camera_parallel.py \
+        --task_suite_name "${suite}" \
+        --camera_tasks_file "${CAMERA_TASKS_DIR}/camera_task_names_${suite}.json" \
+        --gpu_ids "${GPU_IDS}" \
+        --num_trials_per_task "${NUM_TRIALS}" \
+        --output_dir "${OUT}/video_rollouts/${suite}" \
+        --ckpt_path "${CKPT_PATH}" \
+        --config "${CONFIG}" \
+        --dataset_stats_path "${DATASET_STATS}" \
+        --t5_text_embeddings_path "${T5_EMB}" \
+        --ar_future_prediction True \
+        --save_rollout_videos False \
+        --save_future_clips_dir "${MODEL_CLIPS_DIR}"
+  done
+  cat "${MODEL_CLIPS_DIR}"/model_futures_manifest_shard*.jsonl > "${MODEL_MANIFEST}" 2>/dev/null || true
+  echo "[E1-main] Stage A done -> ${MODEL_MANIFEST}"
 fi
 
 # ---- Stage B: GT-replay future clips at the benchmark eval cameras --------

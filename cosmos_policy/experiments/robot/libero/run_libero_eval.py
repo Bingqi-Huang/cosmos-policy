@@ -189,8 +189,10 @@ class PolicyEvalConfig:
     model_family: str = "cosmos"                                         # Model family
     config: str = ""                                                     # Inference config name
     ckpt_path: str = ""                                                  # Pretrained checkpoint path
+    load_ema_to_reg: bool = False                                        # Load EMA checkpoint weights into the regular inference model
     planning_model_config_name: str = ""                                 # Planning model config name
     planning_model_ckpt_path: str = ""                                   # Planning model checkpoint path
+    planning_model_load_ema_to_reg: bool = False                         # Load planning-model EMA checkpoint weights into regular inference weights
     config_file: str = "cosmos_policy/config/config.py"  # Cosmos default config file path
 
     use_third_person_image: bool = True                                  # Whether to include primary (third-person) image in input
@@ -250,8 +252,10 @@ class PolicyEvalConfig:
     shard_index: int = 0                                                 # Index of this shard (0-based); tasks where task_idx % num_shards == shard_index are run
     shard_results_json: str = ""                                         # If set, write per-shard {episodes, successes, sr} JSON here after eval completes
     per_task_jsonl: str = ""                                             # If set, append one JSON line per camera task {task_name, successes, trials} for report generation
+    save_future_clips_dir: str = ""                                      # E1-main: if set, save each camera-task episode's predicted future frames as a clip (.npy) + per-shard manifest, for camera-conditioned excess-FVD
     initial_states_path: str = "DEFAULT"                                 # "DEFAULT", or path to initial states JSON file
     env_img_res: int = 256                                               # Resolution for rendering environment images (not policy input resolution)
+    save_rollout_videos: bool = True                                     # Save rollout videos; disable for checkpoint-selection validation sweeps
 
     #################################################################################################################
     # Utils
@@ -761,35 +765,34 @@ def run_task(
             task_successes += 1
             total_successes += 1
 
-        # Save replay video
-        save_rollout_video(
-            replay_images,
-            total_episodes,
-            success=success,
-            task_description=task_description,
-            log_file=log_file,
-        )
+        if cfg.save_rollout_videos:
+            save_rollout_video(
+                replay_images,
+                total_episodes,
+                success=success,
+                task_description=task_description,
+                log_file=log_file,
+            )
 
-        # Save replay video with future image predictions included
-        future_primary_image_predictions = None
-        if cfg.use_third_person_image:
-            future_primary_image_predictions = [x["future_image"] for x in future_image_predictions_list]
-        future_wrist_image_predictions = None
-        if cfg.use_wrist_image:
-            future_wrist_image_predictions = [x["future_wrist_image"] for x in future_image_predictions_list]
-        save_rollout_video_with_future_image_predictions(
-            replay_images,
-            total_episodes,
-            success=success,
-            task_description=task_description,
-            chunk_size=cfg.chunk_size,
-            num_open_loop_steps=cfg.num_open_loop_steps,
-            rollout_wrist_images=replay_wrist_images,
-            future_primary_image_predictions=future_primary_image_predictions,
-            future_wrist_image_predictions=future_wrist_image_predictions,
-            log_file=log_file,
-            show_diff=False,
-        )
+            future_primary_image_predictions = None
+            if cfg.use_third_person_image:
+                future_primary_image_predictions = [x["future_image"] for x in future_image_predictions_list]
+            future_wrist_image_predictions = None
+            if cfg.use_wrist_image:
+                future_wrist_image_predictions = [x["future_wrist_image"] for x in future_image_predictions_list]
+            save_rollout_video_with_future_image_predictions(
+                replay_images,
+                total_episodes,
+                success=success,
+                task_description=task_description,
+                chunk_size=cfg.chunk_size,
+                num_open_loop_steps=cfg.num_open_loop_steps,
+                rollout_wrist_images=replay_wrist_images,
+                future_primary_image_predictions=future_primary_image_predictions,
+                future_wrist_image_predictions=future_wrist_image_predictions,
+                log_file=log_file,
+                show_diff=False,
+            )
 
         # Save episodic data (in data collection mode)
         if cfg.data_collection and collected_data is not None:
@@ -917,13 +920,52 @@ def run_camera_task(
             task_successes += 1
             total_successes += 1
 
-        save_rollout_video(
-            replay_images,
-            total_episodes,
-            success=success,
-            task_description=task_description,
-            log_file=log_file,
-        )
+        if cfg.save_rollout_videos:
+            save_rollout_video(
+                replay_images,
+                total_episodes,
+                success=success,
+                task_description=task_description,
+                log_file=log_file,
+            )
+
+            future_primary_image_predictions = None
+            if cfg.use_third_person_image:
+                future_primary_image_predictions = [x["future_image"] for x in future_image_predictions_list]
+            future_wrist_image_predictions = None
+            if cfg.use_wrist_image:
+                future_wrist_image_predictions = [x["future_wrist_image"] for x in future_image_predictions_list]
+            save_rollout_video_with_future_image_predictions(
+                replay_images,
+                total_episodes,
+                success=success,
+                task_description=task_description,
+                chunk_size=cfg.chunk_size,
+                num_open_loop_steps=cfg.num_open_loop_steps,
+                rollout_wrist_images=replay_wrist_images,
+                future_primary_image_predictions=future_primary_image_predictions,
+                future_wrist_image_predictions=future_wrist_image_predictions,
+                log_file=log_file,
+                show_diff=False,
+            )
+
+        # E1-main: save predicted future frames as a clip for camera-conditioned excess-FVD.
+        # Independent of save_rollout_videos; one clip per episode, per-shard manifest.
+        if cfg.save_future_clips_dir and cfg.use_third_person_image:
+            from cosmos_policy.experiments.robot.libero.e1_main_fvd import save_model_future_clip
+            from cosmos_policy.experiments.robot.libero.generate_camera_report import _classify_condition
+
+            os.makedirs(cfg.save_future_clips_dir, exist_ok=True)
+            save_model_future_clip(
+                [x["future_image"] for x in future_image_predictions_list],
+                name=camera_task_name,
+                condition=_classify_condition(camera_task_name),
+                out_dir=cfg.save_future_clips_dir,
+                manifest_path=os.path.join(
+                    cfg.save_future_clips_dir, f"model_futures_manifest_shard{cfg.shard_index}.jsonl"
+                ),
+                clip_id=f"{camera_task_name}__ep{total_episodes}",
+            )
 
         log_message(f"Success: {success}", log_file)
         log_message(f"# episodes completed so far: {total_episodes}", log_file)
