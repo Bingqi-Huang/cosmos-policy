@@ -95,14 +95,16 @@ class DissociationResult:
     notes: list[str] = field(default_factory=list)
 
 
-# LIBERO-Plus camera condition labels (authoritative source = generate_camera_report._classify_condition):
-#   C1 = scale != 100         -> zoom / scale
-#   C2 = horizon/vertical view -> pan / tilt
-#   C3 = end_point_rot/vert    -> endpoint rotation / endpoint vertical
+# LIBERO-Plus camera condition labels. Geometry VERIFIED 2026-06-18 against LIBERO-Plus
+# libero_tabletop_manipulation._setup_camera (+ scale_distance_from_pivot / rotate_around_y/z):
+#   C1 = scale_factor                  -> camera DOLLY: distance scaling along view ray (orientation fixed)
+#   C2 = horizon_view + vertical_view  -> ORBITAL viewpoint change: azimuth + elevation (pos AND orientation move)
+#   C3 = end_point_rot + end_point_vert-> IN-PLACE reorientation: orientation rotated about Z,Y (position fixed)
+# (NOT "pan/tilt": pan/tilt implies a fixed camera position, but C2 orbits the camera to a new vantage.)
 AXIS_LABELS = {
-    "C1": "zoom/scale",
-    "C2": "pan/tilt",
-    "C3": "endpoint rotation/vertical",
+    "C1": "dolly (camera distance scaling)",
+    "C2": "orbital azimuth/elevation",
+    "C3": "in-place reorientation (endpoint rot/vert)",
 }
 
 
