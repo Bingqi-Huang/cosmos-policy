@@ -7,7 +7,7 @@
     "protocol": "P2 scene-only, wrist excluded",
     "base_checkpoint": "hf://nvidia/Cosmos-Policy-LIBERO-Predict2-2B/Cosmos-Policy-LIBERO-Predict2-2B.pt",
     "experiment": "cosmos_predict2_2b_480p_libero_scene_only",
-    "launcher": "cosmos_policy/experiments/robot/libero/run_scene_only_pilot_train.sh",
+    "launcher": "cosmos_policy/experiments/robot/libero/launchers/archive/run_scene_only_pilot_train.sh",
     "num_gpus": 6,
     "fsdp_shard_size": 6,
     "batch_size_per_gpu": 30,
@@ -62,13 +62,13 @@
       ],
       "epoch_layout": {"demo": 275313, "success_rollout": 275313, "failure_rollout": 0, "epoch_length": 550626, "shares": "demo 0.50 / succ_roll 0.50 / fail_roll 0.00"},
       "value_head": "preserved (success rollouts feed WM/value heads) -> keeps E5 planning alive",
-      "launch_command": "cd cosmos-policy && nohup bash cosmos_policy/experiments/robot/libero/run_scene_only_pilot_train.sh success_only > outputs/phase1/pilot_logs/armB_success_only_train.log 2>&1 &",
+      "launch_command": "cd cosmos-policy && nohup bash cosmos_policy/experiments/robot/libero/launchers/archive/run_scene_only_pilot_train.sh success_only > outputs/phase1/pilot_logs/armB_success_only_train.log 2>&1 &",
       "wandb": "phase1_pilot_success_only_mix_6gpu_b30_15k",
       "train_log": "outputs/phase1/pilot_logs/armB_success_only_train.log"
     }
   ],
   "eval": {
-    "scanner": "cosmos_policy/experiments/robot/libero/eval_checkpoint_scan.sh",
+    "scanner": "cosmos_policy/experiments/robot/libero/launchers/eval/eval_checkpoint_scan.sh",
     "aggregator": "cosmos_policy/experiments/robot/libero/aggregate_checkpoint_scan.py",
     "comparison": "cosmos_policy/experiments/robot/libero/build_pilot_comparison.py",
     "iters": [6000, 9000, 12000, 15000],

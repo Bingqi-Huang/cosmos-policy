@@ -1,11 +1,9 @@
 """Side-by-side pilot comparison: Arm A (demo-only) vs Arm B (success-only
 mixture) vs current recipe (0.5/0.5), on libero_10.
 
-Judgement discipline (baked into the output header): compare arms by their
-MULTI-POINT mean+/-std only.  Single-checkpoint numbers are NOT a basis for the
-recipe decision -- the 50-trial endpoints were already burned once by sampling
-the oscillation troughs.  This script does not make the decision; recipe choice
-is researcher-only.
+Archived judgement discipline: compare pilot arms by multi-point diagnostics,
+not by one noisy endpoint. This script does not define the formal policy
+protocol; final policy numbers must come from one frozen checkpoint.
 """
 from __future__ import annotations
 
@@ -67,8 +65,8 @@ def main() -> None:
     L: list[str] = []
     L.append("# Pilot comparison — recipe discrimination (libero_10)")
     L.append("")
-    L.append("> **Judgement rule:** compare arms by multi-point **mean±std**, never single checkpoints.")
-    L.append("> This file reports measurements only; the recipe decision is researcher-only.")
+    L.append("> **Archived diagnostic rule:** compare arms by multi-point stability diagnostics.")
+    L.append("> This file reports measurements only; it is not the formal policy protocol.")
     L.append("")
     L.append("## libero_10 success by checkpoint")
     L.append("")
@@ -79,7 +77,7 @@ def main() -> None:
             f"| {it} | {fmt(a.get(it))} | {fmt(b.get(it))} | {fmt(c.get(it))} |"
         )
     L.append("")
-    L.append("## Multi-point mean±std (the decision-relevant numbers)")
+    L.append("## Multi-point diagnostic mean±std")
     L.append("")
     L.append("| arm | window | mean±std |")
     L.append("|---|---|---:|")

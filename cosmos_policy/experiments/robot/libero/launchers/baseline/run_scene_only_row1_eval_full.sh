@@ -1,21 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Prepared launcher for E2 Row-1 scene-only nominal-reference evaluation.
-# This script is intentionally not run by setup code.  Start it after
-# iter_000010000 is complete and the training job has been stopped.
+# Full evaluation launcher for the stable scene-only baseline.
+# Start it only after the training job has been stopped.
+
+cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)"
 
 export MUJOCO_GL="${MUJOCO_GL:-egl}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
 
+bool_arg() {
+  case "${1,,}" in
+    1|true|yes|y|on) echo "True" ;;
+    *) echo "False" ;;
+  esac
+}
+
+CKPT_ITER="${CKPT_ITER:-10000}"
+ITER_NAME="$(printf "iter_%09d" "${CKPT_ITER}")"
+JOB_NAME="${JOB_NAME:-phase1_scene_only_stable_original_ema_b24_gacc5_lr5e5_seed42_15k}"
+CKPT_ROOT="${CKPT_ROOT:-outputs/phase1/cosmos_policy/cosmos_v2_finetune/${JOB_NAME}/checkpoints}"
+
 GPU_IDS="${GPU_IDS:-0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5}"
-CKPT_PATH="${CKPT_PATH:-outputs/phase1/cosmos_policy/cosmos_v2_finetune/phase1_scene_only_formal_6gpu_b30_from_libero_ckpt/checkpoints/iter_000010000}"
-OUT_ROOT="${OUT_ROOT:-outputs/phase1/e2_row1_scene_only_eval/iter_000010000}"
+CKPT_PATH="${CKPT_PATH:-${CKPT_ROOT}/${ITER_NAME}}"
+OUT_ROOT="${OUT_ROOT:-outputs/phase1/scene_only_stable_eval/${ITER_NAME}}"
 ID_NUM_TRIALS="${ID_NUM_TRIALS:-50}"
 CAMERA_NUM_TRIALS="${CAMERA_NUM_TRIALS:-3}"
 SEED="${SEED:-42}"
-RUN_ID_NOTE="${RUN_ID_NOTE:-row1_scene_only_iter10000}"
+RUN_ID_NOTE="${RUN_ID_NOTE:-scene_only_stable_${ITER_NAME}}"
 RUN_ID="${RUN_ID:-all}"
+LOAD_EMA_TO_REG="${LOAD_EMA_TO_REG:-1}"
 
 RUN_ID_EVAL="${RUN_ID_EVAL:-1}"
 RUN_CAMERA_EVAL="${RUN_CAMERA_EVAL:-1}"
@@ -48,12 +62,14 @@ COMMON_FLAGS=(
   --deterministic True
   --randomize_seed False
   --seed "${SEED}"
+  --load_ema_to_reg "$(bool_arg "${LOAD_EMA_TO_REG}")"
 )
 
 mkdir -p "${OUT_ROOT}"
 echo "[preflight] checkpoint: ${CKPT_PATH}"
 echo "[preflight] output:     ${OUT_ROOT}"
 echo "[preflight] GPUs:       ${GPU_IDS}"
+echo "[preflight] load_ema_to_reg: $(bool_arg "${LOAD_EMA_TO_REG}")"
 
 if [[ "${RUN_ID_EVAL}" == "1" ]]; then
   for SUITE in libero_spatial libero_object libero_goal libero_10; do

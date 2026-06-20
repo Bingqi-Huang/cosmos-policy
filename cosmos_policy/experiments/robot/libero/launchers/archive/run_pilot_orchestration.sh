@@ -8,9 +8,9 @@ set -uo pipefail
 #      aborts WITHOUT launching Arm B (task-book rule: triage, do not re-run).
 #   2. launches Arm B (success_only) serially on the same node (blocking).
 #   3. evaluates both arms at 6/9/12/15K on libero_10 (10 trials/task) via the
-#      formalized checkpoint scanner.
-#   4. writes a side-by-side pilot comparison (Arm A vs Arm B vs current-recipe
-#      reference 12K/15K) -- 4-point mean+/-std only, no single-point claims.
+#      diagnostic checkpoint scanner.
+#   4. writes an archived side-by-side pilot comparison. This is not the formal
+#      single-checkpoint policy protocol.
 #
 # Run me in the background (harness-tracked) so completion / failure notifies.
 # -----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ run_eval() {  # $1=ckpt_root $2=label $3=out
   log "eval ${2}: scan ${EVAL_ITERS} on libero_10 (10 trials)"
   CKPT_ROOT="$1" ITERS="${EVAL_ITERS}" SUITES="libero_10" NUM_TRIALS=10 \
     OUT_ROOT="$3" FINAL_WINDOW=3 LABEL="$2" \
-    bash cosmos_policy/experiments/robot/libero/eval_checkpoint_scan.sh \
+    bash cosmos_policy/experiments/robot/libero/launchers/eval/eval_checkpoint_scan.sh \
     > "${LOGDIR}/eval_$(basename "$3").log" 2>&1
 }
 
@@ -80,7 +80,7 @@ for i in $(seq 1 60); do gpu_idle && break; sleep 20; done
 
 # ---- 2. Arm B ----
 log "launching Arm B (success_only) serially ..."
-bash cosmos_policy/experiments/robot/libero/run_scene_only_pilot_train.sh success_only \
+bash cosmos_policy/experiments/robot/libero/launchers/archive/run_scene_only_pilot_train.sh success_only \
   > "${ARMB_LOG}" 2>&1 &
 ARMB_PID=$!
 log "Arm B pid=${ARMB_PID}"

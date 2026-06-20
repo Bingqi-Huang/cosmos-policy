@@ -2,9 +2,9 @@
 
 Reads the raw ``per_task.jsonl`` shards produced by
 ``run_libero_standard_parallel.py`` for a set of checkpoint iterations and
-emits an iter x suite success table plus the mean +/- std summary that is the
-new official paper-number convention (default: over the last 3 iterations at
-5K spacing; configurable).
+emits an iter x suite success table plus diagnostic mean +/- std summaries.
+These summaries are not deployable policy numbers; final policy numbers must
+come from one frozen checkpoint.
 
 This is intentionally decoupled from ``generate_standard_report.py``'s CSV
 schema -- it re-parses the authoritative jsonl rows (fields: task_suite_name /
@@ -77,7 +77,7 @@ def main() -> None:
         "--final_window",
         type=int,
         default=3,
-        help="Number of trailing iters to use for the official mean+/-std (default 3).",
+        help="Number of trailing iters to use for the diagnostic mean+/-std (default 3).",
     )
     ap.add_argument("--label", default="")
     ap.add_argument("--out_name", default="checkpoint_scan_report")

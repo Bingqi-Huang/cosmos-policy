@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # -----------------------------------------------------------------------------
-# Reusable standard-suite checkpoint-scan evaluator (formalized 2026-06-12 from
+# Reusable standard-suite checkpoint-scan evaluator (archived 2026-06-12 from
 # the temporary tmp_scan_libero10_checkpoints.sh).  Evaluates a list of
 # checkpoint iterations of a run over one or more standard LIBERO suites with
 # the P2 scene-only inference protocol, writes the per-iter standard report
-# artifacts (aggregate/per_task CSV + summary.md) AND a cross-iter mean+/-std
+# artifacts (aggregate/per_task CSV + summary.md) and a cross-iter diagnostic
 # report.
 #
-# New official-number convention (researcher-ratified 2026-06-12): paper numbers
-# are the mean+/-std over the trailing FINAL_WINDOW checkpoints (default 3, 5K
-# spacing).  Single-checkpoint numbers are for monitoring only.
+# Current rule: final policy numbers must come from one frozen checkpoint.
+# Cross-checkpoint summaries from this script are diagnostic only.
 #
 # Usage:
 #   CKPT_ROOT=.../checkpoints ITERS="6000 9000 12000 15000" SUITES="libero_10" \
@@ -98,7 +97,7 @@ for ITER in "${ITERS[@]}"; do
   fi
 done
 
-# Cross-iter mean+/-std report (pure stdlib -> system python3 to avoid uv env re-resolution).
+# Cross-iter diagnostic report (pure stdlib -> system python3 to avoid uv env re-resolution).
 python3 cosmos_policy/experiments/robot/libero/aggregate_checkpoint_scan.py \
     --scan_root "${OUT_ROOT}" \
     --iters "${ITERS[@]}" \

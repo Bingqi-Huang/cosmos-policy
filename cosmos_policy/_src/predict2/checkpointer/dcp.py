@@ -82,6 +82,13 @@ from cosmos_policy._src.imaginaire.utils import callback, distributed, log, misc
 from cosmos_policy._src.imaginaire.utils.easy_io import easy_io
 
 try:
+    from torch.distributed.tensor import DTensor as TorchDTensor
+    from torch.distributed.tensor import distribute_tensor
+except ImportError:
+    TorchDTensor = None
+    distribute_tensor = None
+
+try:
     from torch.distributed.checkpoint.default_planner import DefaultLoadPlanner as _DefaultLoadPlanner
     from torch.distributed.checkpoint.default_planner import (
         DTensor,
@@ -313,6 +320,20 @@ class ModelWrapper(Stateful):
             options=StateDictOptions(strict=False),
         )
         list(map(func, self.model))
+
+
+def _match_checkpoint_value_to_template(value: Any, template: Any) -> Any:
+    """Convert a .pt checkpoint value to the current model state value layout."""
+    if not isinstance(value, torch.Tensor):
+        return value
+    if TorchDTensor is not None and isinstance(template, TorchDTensor):
+        if distribute_tensor is None:
+            raise RuntimeError("DTensor checkpoint conversion requires torch.distributed.tensor.distribute_tensor")
+        device = torch.device("cuda", torch.cuda.current_device()) if torch.cuda.is_available() else value.device
+        return distribute_tensor(value.to(device=device), template.device_mesh, template.placements)
+    if isinstance(template, torch.Tensor):
+        return value.to(device=template.device, dtype=template.dtype)
+    return value
 
 
 class OptimizerWrapper(Stateful):
@@ -578,9 +599,21 @@ class DistributedCheckpointer(AbstractCheckpointer):
                 _model_wrapper = ModelWrapper(model, load_ema_to_reg=self.config_checkpoint.load_ema_to_reg)
                 _state_dict = _model_wrapper.state_dict()
                 missing_keys = []
+                initialized_ema_from_regular = 0
                 for key in list(_state_dict.keys()):
                     if key in model_state:
-                        _state_dict[key] = model_state[key]
+                        _state_dict[key] = _match_checkpoint_value_to_template(model_state[key], _state_dict[key])
+                    elif (
+                        not self.config_checkpoint.load_ema_to_reg
+                        and getattr(model.config, "ema", None) is not None
+                        and model.config.ema.enabled
+                        and key.startswith("net_ema.")
+                        and f"net.{key[len('net_ema.'):]}" in model_state
+                    ):
+                        # Keep the current DTensor value in the checkpoint state dict.
+                        # After regular weights load, copy net -> net_ema with the
+                        # model's EMA worker so FSDP/DTensor layouts stay valid.
+                        initialized_ema_from_regular += 1
                     else:
                         missing_keys.append(key)
                 unexpected_keys = [key for key in model_state.keys() if key not in _state_dict]
@@ -589,6 +622,15 @@ class DistributedCheckpointer(AbstractCheckpointer):
                 if unexpected_keys:
                     log.warning(f"Unexpected keys in .pt checkpoint: {unexpected_keys[:10]}... (showing first 10)")
                 _model_wrapper.load_state_dict(_state_dict)
+                if initialized_ema_from_regular:
+                    if not all(hasattr(model, attr) for attr in ("net", "net_ema", "net_ema_worker")):
+                        raise RuntimeError("EMA is enabled but model does not expose net/net_ema/net_ema_worker")
+                    model.net_ema_worker.copy_to(src_model=model.net, tgt_model=model.net_ema)
+                    log.critical(
+                        "Initialized EMA weights from regular .pt checkpoint weights "
+                        f"for {initialized_ema_from_regular} keys",
+                        rank0_only=False,
+                    )
                 if self.callbacks is not None:
                     self.callbacks.on_load_checkpoint(model, state_dict=_state_dict)
                 log.critical(f"Loaded .pt checkpoint from {local_checkpoint_path} in iteration {iteration}")

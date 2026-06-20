@@ -296,7 +296,7 @@ def get_model(cfg):
         experiment_name=cfg.config,
         s3_checkpoint_dir=checkpoint_path,
         config_file=cfg.config_file,
-        load_ema_to_reg=False,
+        load_ema_to_reg=getattr(cfg, "load_ema_to_reg", False),
     )
     model.eval()
     model = model.to(DEVICE)
@@ -332,7 +332,7 @@ def get_planning_model(cfg, device: str = "cuda"):
         experiment_name=cfg.planning_model_config_name,
         s3_checkpoint_dir=checkpoint_path,
         config_file=cfg.config_file,
-        load_ema_to_reg=False,
+        load_ema_to_reg=getattr(cfg, "planning_model_load_ema_to_reg", False),
     )
     planning_model.eval()
     planning_model = planning_model.to(device)

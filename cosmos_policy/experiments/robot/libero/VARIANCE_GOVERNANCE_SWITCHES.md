@@ -1,11 +1,21 @@
 # Variance-governance switches (Task 3, 2026-06-12)
 
-Three knobs prepared for the researcher to combine **after** the recipe pilot
-(Arm A / Arm B) reports. **Implement-only — do NOT launch a formal run with these
-until researcher-approved.** All three are already first-class config fields, so
-they are pure Hydra overrides on the existing scene-only launcher
-(`run_scene_only_pilot_train.sh` / `run_scene_only_train_formal_6gpu.sh`); no code
-change is required.
+Three knobs were prepared for the researcher to combine **after** the recipe
+pilot. The first stable-baseline candidate is now implemented in
+`launchers/baseline/run_scene_only_stable_train_6gpu.sh`; do not launch the main
+grid until this candidate and a second seed pass the baseline-health gate.
+Training with EMA must set `checkpoint.load_ema_to_reg=False` when initializing
+from the official LIBERO `.pt`: that file contains `net.*` weights only, and the
+loader initializes missing `net_ema.*` keys from matching `net.*` keys.
+
+**Chosen launch setting after the 2026-06-14 VRAM/speed mini-benchmark:**
+`dataloader_train.batch_size=24`, `trainer.grad_accum_iter=5`, 6 GPUs
+→ **effective batch = 720**, `optimizer.lr=5e-5`, EMA on. Results:
+`20×6` conservative run ≈13.67 s/iter with max NVML ≈69.2GB; `24×5`
+completed 30 steps + save at 13.52 s/iter with max NVML 78.1GB; `30×4`
+was stopped because it reached ≈91-92.5GB and still showed no speed gain
+(step 3-5 = 13.28/13.35/13.88s). Do not push to `40×3` or larger for the
+formal baseline unless a new memory optimization is introduced.
 
 Baseline (current 30K run and both pilot arms): `optimizer.lr=1e-4`,
 `dataloader_train.batch_size=30`, 6 GPUs, `trainer.grad_accum_iter=1`
@@ -107,6 +117,6 @@ step count and the sample count in the registry.
   `TrainerConfig.grad_accum_iter`, `optimizer.lr`), so failure risk is low.
 - **GPU step-smoke (1–2 iters, finite loss, checkpoint save) — DEFERRED.** Needs
   GPUs, which are fully occupied by the pilot for ~32 h. Run in the post-pilot
-  free window via `run_scene_only_train_step_dryrun.sh` with the chosen overrides
-  added (it already sets `grad_accum_iter=4`, `max_iter=1`, `save_iter=999999`).
+  free window via the stable baseline launcher with `MAX_ITER=1 SAVE_ITER=999999`
+  and the chosen overrides.
 ```

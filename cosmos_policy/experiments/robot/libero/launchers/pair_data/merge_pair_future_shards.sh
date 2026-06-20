@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../.." && pwd)"
 RESULTS_DIR="${RESULTS_DIR:-${REPO}/outputs/phase2/pair_future_frames}"
 N_SHARDS="${N_SHARDS:-6}"
 
