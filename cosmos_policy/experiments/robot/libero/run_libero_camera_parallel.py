@@ -57,6 +57,26 @@ def _count_in_log(log_path: pathlib.Path, pattern: str) -> int:
     return count
 
 
+def _count_jsonl_lines(path: pathlib.Path) -> int:
+    """Count completed tasks = non-empty lines in a shard's per_task.jsonl (one line per task).
+
+    Authoritative progress signal. The old approach grepped the worker log for
+    "Camera task SR:", which is emitted twice per task, so progress read ~200%
+    (e.g. 44/22). per_task.jsonl has exactly one line per finished task.
+    """
+    if not path.exists():
+        return 0
+    count = 0
+    try:
+        with path.open("r", errors="replace") as f:
+            for line in f:
+                if line.strip():
+                    count += 1
+    except OSError:
+        pass
+    return count
+
+
 def _parse_pass_through_args(argv: list[str]) -> tuple[argparse.Namespace, list[str]]:
     """Split our launcher-specific args from the pass-through eval flags."""
     p = argparse.ArgumentParser(add_help=False)
@@ -85,7 +105,7 @@ def main() -> None:
 
     python = sys.executable
 
-    workers: list[tuple[int, str, subprocess.Popen, pathlib.Path, pathlib.Path]] = []
+    workers: list[tuple[int, str, subprocess.Popen, pathlib.Path, pathlib.Path, pathlib.Path]] = []
     started_at = time.time()
 
     for shard_idx, gpu_id in enumerate(gpu_ids):
@@ -123,7 +143,7 @@ def main() -> None:
             stderr=subprocess.STDOUT,
             text=True,
         )
-        workers.append((shard_idx, gpu_id, proc, log_path, results_json))
+        workers.append((shard_idx, gpu_id, proc, log_path, results_json, per_task_jsonl))
         print(f"[launch] shard {shard_idx}/{num_shards} GPU={gpu_id} pid={proc.pid} log={log_path}")
 
     completed: set[int] = set()
@@ -135,8 +155,8 @@ def main() -> None:
         total_done = 0
         shard_summaries = []
 
-        for shard_idx, gpu_id, proc, log_path, results_json in workers:
-            done_ep = _count_in_log(log_path, "Camera task SR:")
+        for shard_idx, gpu_id, proc, log_path, results_json, per_task_jsonl in workers:
+            done_ep = _count_jsonl_lines(per_task_jsonl)
             shard_total = tasks_per_shard[shard_idx]
             total_done += done_ep
             pct = f"{done_ep*100//shard_total}%" if shard_total > 0 else "?"
@@ -175,7 +195,7 @@ def main() -> None:
 
     # Merge shard results
     total_ep, total_succ = 0, 0
-    for shard_idx, gpu_id, proc, log_path, results_json in workers:
+    for shard_idx, gpu_id, proc, log_path, results_json, per_task_jsonl in workers:
         if results_json.exists():
             r = json.loads(results_json.read_text())
             total_ep += r["total_episodes"]
