@@ -12,6 +12,14 @@ __pycache__/
 # Local runtime/benchmark artifacts; keep summaries in AGENT docs instead of git.
 /outputs/phase1/nccl_bench/
 /outputs/phase1/speed_bench/
+/outputs/archive/
+/outputs/phase1/e1_main_full/
+/outputs/phase1/libero_validation_subsets/
+/outputs/phase1/pilot_logs/
+/outputs/phase1/scene_only_stable_eval/
+/outputs/phase1/scene_only_stable_train_seed42.log
+/outputs/phase2/
+/outputs/phase3/
 *.pid
 
 # Model weight files

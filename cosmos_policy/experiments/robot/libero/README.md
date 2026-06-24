@@ -17,6 +17,7 @@ imports remain stable. Shell launchers live under `launchers/`.
 - `generate_standard_report.py` and `generate_camera_report.py`: aggregate evaluator JSONL outputs.
 - `select_stable_checkpoint.py`: selects one deployable checkpoint from validation reports.
 - `prepare_libero_stability_subset.py`: writes the fixed validation subset manifest and task-index files.
+- `diagnostics/scvc/eval_invariant_view_disagreement.py` + `launchers/diagnostics/run_invariant_view_disagreement.sh`: held-out invariant-block cross-view disagreement, Row3 (lambda_cv=0) vs Row4 (SCVC), as an early go/no-go on whether an SCVC run is worth finishing. Reuses the `evaluate_scvc_shrinkage.py` paired-forward scaffolding; latent-space only. New diagnostics live under `diagnostics/<topic>/`, not flat in this directory.
 
 ## Pair Data
 
